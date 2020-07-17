@@ -380,7 +380,7 @@ function LayerCabinet (data, dispatcher) {
         layer_uis.push(layer_ui)
       }
 
-      // layer_uis[i].setState(layer);
+      layer_uis[i].setState(layer, layer_store)
     }
 
     console.log('Total layers (view, hidden, total)', layer_uis.length, unused_layers.length,

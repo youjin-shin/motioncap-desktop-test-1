@@ -92,7 +92,7 @@ DataStore.prototype.setValue = function (paths, value) {
 
 DataStore.prototype.get = function (path, suffix) {
   if (suffix) path = suffix + this.DELIMITER + path
-  console.log(new DataProx(this, path))
+  // console.log(new DataProx(this, path))
   return new DataProx(this, path)
 }
 

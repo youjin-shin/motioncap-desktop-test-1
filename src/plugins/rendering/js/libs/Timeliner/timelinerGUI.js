@@ -9,7 +9,7 @@ import { Dispatcher } from './utils/util_dispatcher.js'
 import { Theme } from './theme.js'
 import { LayoutConstants as Settings } from './layout_constants.js'
 import { utils } from './utils/utils.js'
-import { LayerCabinet } from './views/layer_cabinet.js'
+import { LayerCabinet } from './views/layer_cabinetGUI.js'
 import { TimelinePanel } from './views/panel.js'
 import { IconButton } from './ui/icon_button.js'
 import { ScrollBar } from './ui/scrollbar.js'
@@ -24,7 +24,7 @@ var STORAGE_PREFIX = utils.STORAGE_PREFIX
 
 var Z_INDEX = 999
 
-function LayerProp (name, value) {
+function LayerProp (name) {
   this.name = name
   this.values = []
 
@@ -46,20 +46,9 @@ function Timeliner (controller) {
 
   // Data
   var data = new DataStore()
-
-  var layerStore = data.get('layers')
+  var layerStore = controller.getChannelNames()
 
   var layers = layerStore.value
-
-  var initTracks = controller.getTracks()
-  console.log(initTracks)
-  for (let i = 0; i < initTracks.length; i++) {
-    var layer = new LayerProp(initTracks[i].name, initTracks[i].value)
-
-    layers = layerStore.value
-    layers.push(layer)
-  }
-  console.log(layerStore)
 
   window._data = data // expose it for debugging
 
@@ -365,7 +354,6 @@ function Timeliner (controller) {
   }
 
   function updateState () {
-    layers = layerStore.value // FIXME: support Arrays
     layerPanel.setState(layerStore)
     timeline.setState(layerStore)
 
@@ -373,6 +361,7 @@ function Timeliner (controller) {
   }
 
   function repaintAll () {
+    var layers = controller.getChannelNames()
     var contentHeight = layers.length * Settings.LINE_HEIGHT
     scrollbar.setLength(Settings.TIMELINE_SCROLL_HEIGHT / contentHeight)
 
@@ -750,9 +739,8 @@ function Timeliner (controller) {
   function addLayer (name) {
     var layer = new LayerProp(name)
 
-    layers = layerStore.value
+    layers = layerStore
     layers.push(layer)
-    console.log(layer, layers, layerStore)
     layerPanel.setState(layerStore)
   }
 

@@ -205,21 +205,21 @@ export default {
         {
           type: THREE.VectorKeyframeTrack,
           propertyPath: 'MyBox.position',
-          initialValue: [0, 0, 0],
+          initialValue: [0, 1, 0],
           interpolation: THREE.InterpolateSmooth
         },
 
         {
           type: THREE.QuaternionKeyframeTrack,
           propertyPath: 'MyBox.quaternion',
-          initialValue: [0, 0, 0, 1],
+          initialValue: [1, 0, 0, 0],
           interpolation: THREE.InterpolateLinear
 
         }
 
       ]
       // eslint-disable-next-line no-new
-      new Timeliner(new TimelinerController(scene, this.trackInfo, this.render).init())
+      new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
       window.addEventListener('resize', this.onWindowResize, false)
     },
 
