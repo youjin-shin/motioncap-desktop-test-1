@@ -1,24 +1,36 @@
-# motioncap-desktop-client
+
+# motioncap-desktop-test
+
+
+[![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
+### Develop Environment
+
+* [@vue/cli]
+    * Version : 4.4.6
+* [node.js]
+    * Version: v10.16.3
+
+
 
 ## Project setup
+
+### Install Dependencies
+in project directory
 ```
-yarn install
+$ yarn
 ```
 
 ### Compiles and hot-reloads for development
-```
-yarn serve
+Need to use terminal for webcam access
+```sh
+$ yarn electron:serve
 ```
 
 ### Compiles and minifies for production
 ```
-yarn build
+$ yarn electron:build
 ```
 
-### Lints and fixes files
-```
-yarn lint
-```
+### FAQ
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Document
