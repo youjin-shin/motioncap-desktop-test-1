@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable camelcase */
 /* eslint-disable no-tabs */
+
 /**************************/
 // Dispatcher
 /**************************/
@@ -22,7 +23,6 @@ function Dispatcher () {
     var args = Array.prototype.slice.call(arguments)
     args.shift()
     var listeners = event_listeners[type]
-    // console.log(type)
     if (!listeners) return
     for (var i = 0; i < listeners.length; i++) {
       var listener = listeners[i]

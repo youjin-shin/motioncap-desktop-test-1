@@ -152,7 +152,7 @@ function timeAtLayer (layer, t) {
   // Find the value of layer at t seconds.
   // this expect layer to be sorted
   // not the most optimized for now, but would do.
-
+  // console.log(layer)
   var values = layer.values
   var i, il, entry, prev_entry
 

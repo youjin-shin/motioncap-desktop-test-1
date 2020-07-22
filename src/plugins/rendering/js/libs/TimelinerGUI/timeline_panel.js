@@ -1,52 +1,38 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 /* eslint-disable camelcase */
 /* eslint-disable no-tabs */
 
-import { LayoutConstants } from '../layout_constants.js'
-import { Theme } from '../theme.js'
-import { utils } from '../utils/utils.js'
-import { Tweens } from '../utils/util_tween.js'
-import { handleDrag } from '../utils/util_handle_drag.js'
-import { ScrollCanvas } from './time_scroller.js'
-import { Canvas } from '../ui/canvas.js'
+// var LayoutConstants = require('./layout_constants')
+// var Theme = require('./theme')
+// var utils = require('./utils')
+import { LayoutConstants } from './layout_constants.js'
+import { Theme } from './theme.js'
+import { utils } from './utils.js'
+var proxy_ctx = utils.proxy_ctx
 
-const proxy_ctx = utils.proxy_ctx
-
-var
-  LINE_HEIGHT = LayoutConstants.LINE_HEIGHT
+var LINE_HEIGHT = LayoutConstants.LINE_HEIGHT
 var DIAMOND_SIZE = LayoutConstants.DIAMOND_SIZE
-var TIME_SCROLLER_HEIGHT = 35
-var MARKER_TRACK_HEIGHT = 25
+var MARKER_TRACK_HEIGHT = LayoutConstants.MARKER_TRACK_HEIGHT
+
 var LEFT_PANE_WIDTH = LayoutConstants.LEFT_PANE_WIDTH
-var time_scale = LayoutConstants.time_scale
-var TOP = 10
+var time_scale = LayoutConstants.TIME_SCALE
 
 var frame_start = 0 // this is the current scroll position.
-
-/*
- * This class contains the view for the right main section of timeliner
- */
-
 // TODO
 // dirty rendering
 // drag block
-// DON'T use time.update for everything
+// drag current time
+// pointer on timescale
 
-var tickMark1
-var tickMark2
-var tickMark3
+var tickMark1, tickMark2, tickMark3
 
 function time_scaled () {
-  /*
-	 * Subdivison LOD
-	 * time_scale refers to number of pixels per unit
-	 * Eg. 1 inch - 60s, 1 inch - 60fps, 1 inch - 6 mins
-	 */
   var div = 60
 
   tickMark1 = time_scale / div
   tickMark2 = 2 * tickMark1
-  tickMark3 = 10 * tickMark1
+  tickMark3 = 8 * tickMark1
 }
 
 time_scaled()
@@ -55,63 +41,45 @@ time_scaled()
 // Timeline Panel
 /**************************/
 
-function TimelinePanel (data, dispatcher) {
+function TimelinePanel (context) {
+  var dispatcher = context.dispatcher
+
+  var scrollTop = 0; var scrollLeft = 0
+
   var dpr = window.devicePixelRatio
-  var track_canvas = document.createElement('canvas')
+  var canvas = document.createElement('canvas')
 
-  var scrollTop = 0; var scrollLeft = 0; var SCROLL_HEIGHT
-  var layers = data.get('layers').value
+  var layers
 
-  this.scrollTo = function (s, y) {
-    scrollTop = s * Math.max(layers.length * LINE_HEIGHT - SCROLL_HEIGHT, 0)
+  this.updateState = function () {
+    layers = context.controller.getChannelNames()
+    repaint()
+  }
+
+  this.updateState()
+
+  this.scrollTo = function (s) {
+    scrollTop = s * Math.max(layers.length * LINE_HEIGHT - context.scrollHeight, 0)
     repaint()
   }
 
   this.resize = function () {
-    var h = (LayoutConstants.height - TIME_SCROLLER_HEIGHT)
     dpr = window.devicePixelRatio
-    track_canvas.width = LayoutConstants.width * dpr
-    track_canvas.height = h * dpr
-    track_canvas.style.width = LayoutConstants.width + 'px'
-    track_canvas.style.height = h + 'px'
-    SCROLL_HEIGHT = LayoutConstants.height - TIME_SCROLLER_HEIGHT
-    scroll_canvas.setSize(LayoutConstants.width, TIME_SCROLLER_HEIGHT)
+    canvas.width = context.width * dpr
+    canvas.height = context.height * dpr
+    canvas.style.width = context.width + 'px'
+    canvas.style.height = context.height + 'px'
+    context.scrollHeight = context.height - MARKER_TRACK_HEIGHT
   }
 
-  var div = document.createElement('div')
-
-  var scroll_canvas = new Canvas(LayoutConstants.width, TIME_SCROLLER_HEIGHT)
-  // data.addListener('ui', repaint );
-
-  utils.style(track_canvas, {
-    position: 'absolute',
-    top: TIME_SCROLLER_HEIGHT + 'px',
-    left: '0px'
-  })
-
-  utils.style(scroll_canvas.dom, {
-    position: 'absolute',
-    top: '0px',
-    left: '10px'
-  })
-
-  scroll_canvas.uses(new ScrollCanvas(dispatcher, data))
-
-  div.appendChild(track_canvas)
-  div.appendChild(scroll_canvas.dom)
-  scroll_canvas.dom.id = 'scroll-canvas'
-  track_canvas.id = 'track-canvas'
-
-  // this.dom = canvas;
-  this.dom = div
-  this.dom.id = 'timeline-panel'
+  this.dom = canvas
   this.resize()
 
-  var ctx = track_canvas.getContext('2d')
+  var ctx = canvas.getContext('2d')
   var ctx_wrap = proxy_ctx(ctx)
 
-  var currentTime // measured in seconds
-  // technically it could be in frames or  have it in string format (0:00:00:1-60)
+  var current_frame // currently in seconds
+  // var currentTime = 0; // in frames? could have it in string format (0:00:00:1-60)
 
   var LEFT_GUTTER = 20
   var i, x, y, il, j
@@ -119,60 +87,23 @@ function TimelinePanel (data, dispatcher) {
   var needsRepaint = false
   var renderItems = []
 
-  function EasingRect (x1, y1, x2, y2, frame, frame2, values, layer, j) {
-    var self = this
+  var timeDrag = 0
+  var channelDrag
 
-    this.path = function () {
-      ctx_wrap.beginPath()
-        .rect(x1, y1, x2 - x1, y2 - y1)
-        .closePath()
-    }
-
-    this.paint = function () {
-      this.path()
-      ctx.fillStyle = frame._color
-      ctx.fill()
-    }
-
-    this.mouseover = function () {
-      track_canvas.style.cursor = 'pointer' // pointer move ew-resize
-    }
-
-    this.mouseout = function () {
-      track_canvas.style.cursor = 'default'
-    }
-
-    this.mousedrag = function (e) {
-      var t1 = x_to_time(x1 + e.dx)
-      t1 = Math.max(0, t1)
-      // TODO limit moving to neighbours
-      frame.time = t1
-
-      var t2 = x_to_time(x2 + e.dx)
-      t2 = Math.max(0, t2)
-      frame2.time = t2
-
-      // dispatcher.fire('time.update', t1);
-    }
-  }
-
-  function Diamond (frame, y) {
-    var x, y2
-
-    x = time_to_x(frame.time)
-    y2 = y + LINE_HEIGHT * 0.5 - DIAMOND_SIZE / 2
-
+  function Diamond (t, x, y) {
     var self = this
 
     var isOver = false
 
+    this.time = t
+
     this.path = function (ctx_wrap) {
       ctx_wrap
         .beginPath()
-        .moveTo(x, y2)
-        .lineTo(x + DIAMOND_SIZE / 2, y2 + DIAMOND_SIZE / 2)
-        .lineTo(x, y2 + DIAMOND_SIZE)
-        .lineTo(x - DIAMOND_SIZE / 2, y2 + DIAMOND_SIZE / 2)
+        .moveTo(x, y)
+        .lineTo(x + DIAMOND_SIZE / 2, y + DIAMOND_SIZE / 2)
+        .lineTo(x, y + DIAMOND_SIZE)
+        .lineTo(x - DIAMOND_SIZE / 2, y + DIAMOND_SIZE / 2)
         .closePath()
     }
 
@@ -186,24 +117,31 @@ function TimelinePanel (data, dispatcher) {
 
     this.mouseover = function () {
       isOver = true
-      track_canvas.style.cursor = 'move' // pointer move ew-resize
+      canvas.style.cursor = 'move' // pointer move ew-resize
       self.paint(ctx_wrap)
     }
 
     this.mouseout = function () {
       isOver = false
-      track_canvas.style.cursor = 'default'
+      canvas.style.cursor = 'default'
       self.paint(ctx_wrap)
     }
 
-    this.mousedrag = function (e) {
-      var t = x_to_time(x + e.dx)
-      t = Math.max(0, t)
-      // TODO limit moving to neighbours
-      frame.time = t
-      dispatcher.fire('time.update', t)
-      // console.log('frame', frame);
-      // console.log(s, format_friendly_seconds(s), this);
+    this.mousedrag = function (e, domEvent) {
+      if (channelDrag !== undefined) {
+        var t = x_to_time(e.offsetx)
+        var delta = Math.max(t - timeDrag, -timeDrag)
+        var shift = domEvent.shiftKey
+
+        if (delta) {
+          context.draggingKeyframe = true
+
+          context.controller.moveKeyframe(channelDrag, timeDrag, delta, shift)
+
+          timeDrag += delta
+          repaint()
+        }
+      }
     }
   }
 
@@ -212,7 +150,8 @@ function TimelinePanel (data, dispatcher) {
   }
 
   function drawLayerContents () {
-    renderItems = []
+    renderItems.length = 0
+
     // horizontal Layer lines
     for (i = 0, il = layers.length; i <= il; i++) {
       ctx.strokeStyle = Theme.b
@@ -222,76 +161,99 @@ function TimelinePanel (data, dispatcher) {
 
       ctx_wrap
         .moveTo(0, y)
-        .lineTo(LayoutConstants.width, y)
+        .lineTo(context.width, y)
         .stroke()
     }
 
-    var frame, frame2, j
-
-    // Draw Easing Rects
+    // Draw Diamonds
     for (i = 0; i < il; i++) {
       // check for keyframes
       var layer = layers[i]
-      var values = layer.values
+      var times = context.controller.getChannelKeyTimes(layer)
 
       y = i * LINE_HEIGHT
 
-      for (j = 0; j < values.length - 1; j++) {
-        frame = values[j]
-        frame2 = values[j + 1]
+      // TODO use upper and lower bound here
 
-        // Draw Tween Rect
-        var x = time_to_x(frame.time)
-        var x2 = time_to_x(frame2.time)
+      for (var j = 0; j < times.length; j++) {
+        var time = times[j]
 
-        if (!frame.tween || frame.tween === 'none') continue
-
-        var y1 = y + 2
-        var y2 = y + LINE_HEIGHT - 2
-
-        renderItems.push(new EasingRect(x, y1, x2, y2, frame, frame2))
-
-        // // draw easing graph
-        // var color = parseInt(frame._color.substring(1,7), 16);
-        // color = 0xffffff ^ color;
-        // color = color.toString(16);           // convert to hex
-        // color = '#' + ('000000' + color).slice(-6);
-
-        // ctx.strokeStyle = color;
-        // var x3;
-        // ctx.beginPath();
-        // ctx.moveTo(x, y2);
-        // var dy = y1 - y2;
-        // var dx = x2 - x;
-
-        // for (x3=x; x3 < x2; x3++) {
-        // 	ctx.lineTo(x3, y2 + Tweens[frame.tween]((x3 - x)/dx) * dy);
-        // }
-        // ctx.stroke();
-      }
-
-      for (j = 0; j < values.length; j++) {
-        // Dimonds
-        frame = values[j]
-        renderItems.push(new Diamond(frame, y))
+        renderItems.push(new Diamond(
+          time, time_to_x(time),
+          y + LINE_HEIGHT * 0.5 - DIAMOND_SIZE / 2))
       }
     }
 
-    // render items
-    var item
+    // render
     for (i = 0, il = renderItems.length; i < il; i++) {
-      item = renderItems[i]
+      var item = renderItems[i]
       item.paint(ctx_wrap)
     }
   }
 
-  function setTimeScale () {
-    var v = data.get('ui:timeScale').value
+  var TOP_SCROLL_TRACK = 20
+  var scroller = {
+    left: 0,
+    grip_length: 0,
+    k: 1
+  }
+  var left
+
+  function drawScroller () {
+    var w = context.width
+
+    var totalTime = context.totalTime
+    var viewTime = w / time_scale
+
+    var k = w / totalTime // pixels per seconds
+    scroller.k = k
+
+    // 800 / 5 = 180
+
+    // var k = Math.min(viewTime / totalTime, 1);
+    // var grip_length = k * w;
+
+    scroller.grip_length = viewTime * k
+    var h = TOP_SCROLL_TRACK
+
+    scroller.left = context.scrollTime * k
+    scroller.left = Math.min(Math.max(0, scroller.left), w - scroller.grip_length)
+
+    ctx.beginPath()
+    ctx.fillStyle = Theme.b // 'cyan';
+    ctx.rect(0, 5, w, h)
+    ctx.fill()
+
+    ctx.fillStyle = Theme.c // 'yellow';
+
+    ctx.beginPath()
+    ctx.rect(scroller.left, 5, scroller.grip_length, h)
+    ctx.fill()
+
+    var r = current_frame * k
+
+    // ctx.fillStyle = Theme.a; // 'yellow';
+    // ctx.fillRect(0, 5, w, 2);
+
+    ctx.fillStyle = 'red'
+    ctx.fillRect(0, 5, r, 2)
+
+    // ctx.strokeStyle = 'red';
+    // ctx.lineWidth = 2;
+    // ctx.beginPath();
+    // ctx.moveTo(r, 5);
+    // ctx.lineTo(r, 15);
+    // ctx.stroke();
+  }
+
+  function setTimeScale (v) {
     if (time_scale !== v) {
       time_scale = v
       time_scaled()
     }
   }
+
+  this.setTimeScale = setTimeScale
 
   var over = null
   var mousedownItem = null
@@ -338,7 +300,7 @@ function TimelinePanel (data, dispatcher) {
       .scale(dpr, dpr)
       .translate(0, MARKER_TRACK_HEIGHT)
       .beginPath()
-      .rect(0, 0, LayoutConstants.width, SCROLL_HEIGHT)
+      .rect(0, 0, context.width, context.scrollHeight)
       .translate(-scrollLeft, -scrollTop)
       .clip()
       .run(check)
@@ -351,18 +313,16 @@ function TimelinePanel (data, dispatcher) {
       return
     }
 
-    scroll_canvas.repaint()
+    setTimeScale(context.timeScale)
 
-    setTimeScale()
-
-    currentTime = data.get('ui:currentTime').value
-    frame_start = data.get('ui:scrollTime').value
+    current_frame = context.currentTime
+    frame_start = context.scrollTime
 
     /**************************/
     // background
 
     ctx.fillStyle = Theme.a
-    ctx.clearRect(0, 0, track_canvas.width, track_canvas.height)
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.save()
     ctx.scale(dpr, dpr)
 
@@ -370,13 +330,13 @@ function TimelinePanel (data, dispatcher) {
 
     ctx.lineWidth = 1 // .5, 1, 2
 
-    var width = LayoutConstants.width
-    var height = LayoutConstants.height
+    var width = context.width
+    var height = context.height
 
     var units = time_scale / tickMark1
     var offsetUnits = (frame_start * time_scale) % units
 
-    var count = (width - LEFT_GUTTER + offsetUnits) / units
+    var count = (context.width - LEFT_GUTTER + offsetUnits) / units
 
     // console.log('time_scale', time_scale, 'tickMark1', tickMark1, 'units', units, 'offsetUnits', offsetUnits, frame_start);
 
@@ -404,7 +364,7 @@ function TimelinePanel (data, dispatcher) {
     }
 
     units = time_scale / tickMark2
-    count = (width - LEFT_GUTTER + offsetUnits) / units
+    count = (context.width - LEFT_GUTTER + offsetUnits) / units
 
     // marker lines - main
     for (i = 0; i < count; i++) {
@@ -418,7 +378,7 @@ function TimelinePanel (data, dispatcher) {
 
     var mul = tickMark3 / tickMark2
     units = time_scale / tickMark3
-    count = (width - LEFT_GUTTER + offsetUnits) / units
+    count = (context.width - LEFT_GUTTER + offsetUnits) / units
 
     // small ticks
     for (i = 0; i < count; i++) {
@@ -436,17 +396,19 @@ function TimelinePanel (data, dispatcher) {
       .save()
       .translate(0, MARKER_TRACK_HEIGHT)
       .beginPath()
-      .rect(0, 0, LayoutConstants.width, SCROLL_HEIGHT)
+      .rect(0, 0, context.width, context.scrollHeight)
       .translate(-scrollLeft, -scrollTop)
       .clip()
       .run(drawLayerContents)
       .restore()
 
+    drawScroller()
+
     // Current Marker / Cursor
     ctx.strokeStyle = 'red' // Theme.c
-    x = (currentTime - frame_start) * time_scale + LEFT_GUTTER
+    x = (current_frame - frame_start) * time_scale + LEFT_GUTTER
 
-    var txt = utils.format_friendly_seconds(currentTime)
+    var txt = utils.format_friendly_seconds(current_frame)
     var textWidth = ctx.measureText(txt).width
 
     var base_line = MARKER_TRACK_HEIGHT - 5; var half_rect = textWidth / 2 + 4
@@ -512,17 +474,18 @@ function TimelinePanel (data, dispatcher) {
 
   document.addEventListener('mousemove', onMouseMove)
 
-  track_canvas.addEventListener('dblclick', function (e) {
-    canvasBounds = track_canvas.getBoundingClientRect()
+  canvas.addEventListener('dblclick', function (e) {
+    canvasBounds = canvas.getBoundingClientRect()
     var mx = e.clientX - canvasBounds.left; var my = e.clientY - canvasBounds.top
+
     var track = y_to_track(my)
     var s = x_to_time(mx)
-    dispatcher.fire('keyframe', layers[track], currentTime)
-    // console.log(layers)
+
+    dispatcher.fire('keyframe', layers[track], current_frame)
   })
 
   function onMouseMove (e) {
-    canvasBounds = track_canvas.getBoundingClientRect()
+    canvasBounds = canvas.getBoundingClientRect()
     var mx = e.clientX - canvasBounds.left; var my = e.clientY - canvasBounds.top
     onPointerMove(mx, my)
   }
@@ -536,47 +499,64 @@ function TimelinePanel (data, dispatcher) {
     pointer = { x: x, y: y }
   }
 
-  track_canvas.addEventListener('mouseout', function () {
+  canvas.addEventListener('mouseout', function () {
     pointer = null
   })
 
   var mousedown2 = false; var mouseDownThenMove = false
-  handleDrag(track_canvas, function down (e) {
+  utils.handleDrag(canvas, function down (e) {
     mousedown2 = true
     pointer = {
       x: e.offsetx,
       y: e.offsety
     }
     pointerEvents()
-
-    if (!mousedownItem) dispatcher.fire('time.update', x_to_time(e.offsetx))
+    if (mousedownItem instanceof Diamond) {
+      timeDrag = mousedownItem.time
+      channelDrag = layers[y_to_track(e.offsety)]
+      if (!channelDrag) mousedownItem = null
+    }
+    dispatcher.fire('time.update', x_to_time(e.offsetx))
     // Hit criteria
-  }, function move (e) {
+  }, function move (e, domEvent) {
     mousedown2 = false
     if (mousedownItem) {
       mouseDownThenMove = true
       if (mousedownItem.mousedrag) {
-        mousedownItem.mousedrag(e)
+        mousedownItem.mousedrag(e, domEvent)
       }
     } else {
       dispatcher.fire('time.update', x_to_time(e.offsetx))
     }
-  }, function up (e) {
+  }, function up () {
     if (mouseDownThenMove) {
       dispatcher.fire('keyframe.move')
-    } else {
-      dispatcher.fire('time.update', x_to_time(e.offsetx))
     }
     mousedown2 = false
     mousedownItem = null
     mouseDownThenMove = false
+    context.draggingKeyframe = false
+    repaint()
   }
   )
 
-  this.setState = function (state) {
-    layers = state.value
+  /** Handles dragging for scroll bar **/
+
+  var draggingx
+
+  utils.handleDrag(canvas, function down (e) {
+    draggingx = scroller.left
+  }, function move (e) {
+    context.scrollTime = Math.max(0, (draggingx + e.dx) / scroller.k)
     repaint()
+  }, function up () {
+  }, function (e) {
+    var bar = e.offsetx >= scroller.left && e.offsetx <= scroller.left + scroller.grip_length
+    return e.offsety <= TOP_SCROLL_TRACK && bar
   }
+  )
+
+  /** * End handling for scrollbar ***/
 }
 
 export { TimelinePanel }

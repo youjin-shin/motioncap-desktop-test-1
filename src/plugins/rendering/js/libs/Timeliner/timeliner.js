@@ -26,7 +26,8 @@ var Z_INDEX = 999
 
 function LayerProp (name, value) {
   this.name = name
-  this.values = []
+  if (value) { this.values = value } else this.values = []
+  // this.values = []
 
   this._value = 0
 
@@ -49,18 +50,6 @@ function Timeliner (controller) {
 
   var layerStore = data.get('layers')
 
-  var layers = layerStore.value
-
-  var initTracks = controller.getTracks()
-  console.log(initTracks)
-  for (let i = 0; i < initTracks.length; i++) {
-    var layer = new LayerProp(initTracks[i].name, initTracks[i].value)
-
-    layers = layerStore.value
-    layers.push(layer)
-  }
-  console.log(layerStore)
-
   window._data = data // expose it for debugging
 
   // Undo manager
@@ -70,6 +59,19 @@ function Timeliner (controller) {
   var timeline = new TimelinePanel(data, dispatcher)
   var layerPanel = new LayerCabinet(data, dispatcher)
 
+  // console.log(layerStore)
+
+  var initTracks = controller.getTracks()
+  console.log(initTracks)
+  var layers = layerStore.value
+  for (let i = 0; i < initTracks.length; i++) {
+    var layer = new LayerProp(initTracks[i].name)
+
+    layers.push(layer)
+    console.log(layer, layers, layerStore)
+    layerPanel.setState(layerStore)
+  }
+  console.log(layerStore)
   setTimeout(function () {
     // hack!
     undoManager.save(new UndoState(data, 'Loaded'), true)
@@ -84,20 +86,20 @@ function Timeliner (controller) {
     // console.log(v, '...keyframe index', index, utils.format_friendly_seconds(t), typeof(v));
     // console.log('layer', layer, value);
 
-    if (typeof (v) === 'number') {
-      layer.values.splice(v, 0, {
-        time: t,
-        value: value,
-        _color: '#' + (Math.random() * 0xffffff | 0).toString(16)
-      })
+    // if (typeof (v) === 'number') {
+    //   layer.values.splice(v, 0, {
+    //     time: t,
+    //     value: value,
+    //     _color: '#' + (Math.random() * 0xffffff | 0).toString(16)
+    //   })
 
-      undoManager.save(new UndoState(data, 'Add Keyframe'))
-    } else {
-      console.log('remove from index', v)
-      layer.values.splice(v.index, 1)
+    //   undoManager.save(new UndoState(data, 'Add Keyframe'))
+    // } else {
+    //   console.log('remove from index', v)
+    //   layer.values.splice(v.index, 1)
 
-      undoManager.save(new UndoState(data, 'Remove Keyframe'))
-    }
+    //   undoManager.save(new UndoState(data, 'Remove Keyframe'))
+    // }
 
     repaintAll()
   })
@@ -365,10 +367,9 @@ function Timeliner (controller) {
   }
 
   function updateState () {
-    layers = layerStore.value // FIXME: support Arrays
+    // layers = layerStore.value // FIXME: support Arrays
     layerPanel.setState(layerStore)
     timeline.setState(layerStore)
-
     repaintAll()
   }
 

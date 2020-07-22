@@ -96,7 +96,7 @@ function LayerView (layer, dispatcher) {
 
   // Solo
   var solo_toggle = new ToggleButton('S')
-  dom.appendChild(solo_toggle.dom)
+  // dom.appendChild(solo_toggle.dom)
 
   solo_toggle.onClick = function () {
     dispatcher.fire('action:solo', layer, solo_toggle.pressed)
@@ -104,7 +104,7 @@ function LayerView (layer, dispatcher) {
 
   // Mute
   var mute_toggle = new ToggleButton('M')
-  dom.appendChild(mute_toggle.dom)
+  // dom.appendChild(mute_toggle.dom)
 
   mute_toggle.onClick = function () {
     dispatcher.fire('action:mute', layer, mute_toggle.pressed)
@@ -166,7 +166,7 @@ function LayerView (layer, dispatcher) {
     var tween = null
     var o = utils.timeAtLayer(layer, s)
 
-    if (!o) return
+    if (!o || !s) return
 
     if (o.can_tween) {
       dropdown.style.opacity = 1

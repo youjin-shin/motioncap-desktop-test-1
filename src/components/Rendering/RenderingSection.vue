@@ -17,7 +17,7 @@ import { OrbitControls } from '@/plugins/rendering/jsm/controls/cameraOrbitContr
 // import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 import { TransformControls } from '@/plugins/rendering/jsm/controls/transformControls.js'
 
-import { Timeliner } from '@/plugins/rendering/js/libs/Timeliner/timeliner.js'
+import { Timeliner } from '@/plugins/rendering/js/libs/TimelinerGUI/timeliner.js'
 import { TimelinerController } from 'three/examples/jsm/animation/TimelinerController.js'
 
 var scene, renderer, camera, stats, grid
@@ -205,19 +205,20 @@ export default {
         {
           type: THREE.VectorKeyframeTrack,
           propertyPath: 'MyBox.position',
-          initialValue: [0, 1, 0],
+          initialValue: [0, 0, 0],
           interpolation: THREE.InterpolateSmooth
         },
 
         {
           type: THREE.QuaternionKeyframeTrack,
           propertyPath: 'MyBox.quaternion',
-          initialValue: [1, 0, 0, 0],
+          initialValue: [0, 0, 0, 1],
           interpolation: THREE.InterpolateLinear
 
         }
 
       ]
+
       // eslint-disable-next-line no-new
       new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
       window.addEventListener('resize', this.onWindowResize, false)
