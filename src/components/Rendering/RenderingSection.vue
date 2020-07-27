@@ -1,12 +1,12 @@
+
 <template>
   <div>
-    <div id="container"></div>
-    <div>{{this.settings}}</div>
+    <div ref="container" id="container"></div>
   </div>
 </template>
 
 <script>
-
+/* eslint-disable no-unused-vars */
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
@@ -37,7 +37,8 @@ export default {
       actions: [],
       settings: [],
       weights: [],
-      trackInfo: []
+      trackInfo: [],
+      container: undefined
     }
   },
   mounted () {
@@ -45,19 +46,21 @@ export default {
   },
   methods: {
     init () {
-      var container = document.getElementById('container')
+      // container = document.getElementById('container')
+      this.container = this.$refs.container
+
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
       camera.position.set(3, 3, -5)
       clock = new THREE.Clock()
 
       scene = new THREE.Scene()
-      scene.background = new THREE.Color(0x303030)
+      scene.background = new THREE.Color(0x1b1b1b)
       scene.fog = new THREE.Fog(0x303030, 10, 50)
 
-      grid = new THREE.GridHelper(16, 16, 0xff0000, 0x101010)
+      grid = new THREE.GridHelper(16, 16, 0xff0000, 0x222222)
       scene.add(grid)
 
-      var hemiLight = new THREE.HemisphereLight(0xffffff, 0x303030)
+      var hemiLight = new THREE.HemisphereLight(0xffffff, 0x1b1b1b)
       hemiLight.position.set(0, 20, 0)
       scene.add(hemiLight)
 
@@ -85,10 +88,10 @@ export default {
       renderer.setSize(window.innerWidth, window.innerHeight)
       renderer.outputEncoding = THREE.sRGBEncoding
 
-      container.appendChild(renderer.domElement)
+      this.container.appendChild(renderer.domElement)
 
       stats = new Stats()
-      container.appendChild(stats.dom)
+      this.container.appendChild(stats.dom)
 
       // Camera Orbit Controller
       cameraControls = new OrbitControls(camera, renderer.domElement)
@@ -108,15 +111,15 @@ export default {
       var material = new THREE.MeshBasicMaterial({ color: 0xffff00 })
       var mesh = new THREE.Mesh(geometry, material)
       mesh.name = 'MyBox'
-      scene.add(mesh)
+      // scene.add(mesh)
 
       var loader = new GLTFLoader()
       if (this.path !== undefined) {
         loader.load(this.path, (gltf) => {
           model = gltf.scene
-          console.log('Model loaded!')
-          console.log(gltf)
-          // scene.add(model)
+
+          // console.log(gltf)
+          scene.add(model)
 
           model.traverse(function (object) {
             if (object.isMesh) object.castShadow = true
@@ -126,10 +129,14 @@ export default {
 
           skeleton = new THREE.SkeletonHelper(model)
           skeleton.visible = true
-          skeleton.bones.forEach(element => {
 
-          })
-          skeleton.bones[4].visible = false
+          // skeleton.bones.forEach(element => {
+          //   // element.visible = false
+          //   console.log(element)
+
+          //   // meshControls.attach(element)
+          // })
+          // // skeleton.bones[4].visible = false
           scene.add(skeleton)
 
           //
@@ -140,14 +147,37 @@ export default {
 
           mixer = new THREE.AnimationMixer(model)
 
+          // var jsonObject = JSON.stringify(animations[0])
+          // console.log(jsonObject)
           animations.forEach(element => {
             if (element.name !== 'TPose') {
               this.actions.push(mixer.clipAction(element))
             }
           })
 
-          meshControls.attach(mesh)
+          meshControls.attach(model)
           scene.add(meshControls)
+
+          this.trackInfo = [
+
+            {
+              type: THREE.VectorKeyframeTrack,
+              propertyPath: model.name + '.position',
+              initialValue: Object.values(model.position),
+              interpolation: THREE.InterpolateSmooth
+            },
+
+            {
+              type: THREE.QuaternionKeyframeTrack,
+              propertyPath: model.name + '.quaternion',
+              initialValue: Object.values(model.quaternion),
+              interpolation: THREE.InterpolateLinear
+
+            }
+
+          ]
+          // eslint-disable-next-line no-new
+          // new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
 
           this.activateAllActions()
 
@@ -200,27 +230,8 @@ export default {
         }
       })
 
-      this.trackInfo = [
-
-        {
-          type: THREE.VectorKeyframeTrack,
-          propertyPath: 'MyBox.position',
-          initialValue: [0, 0, 0],
-          interpolation: THREE.InterpolateSmooth
-        },
-
-        {
-          type: THREE.QuaternionKeyframeTrack,
-          propertyPath: 'MyBox.quaternion',
-          initialValue: [0, 0, 0, 1],
-          interpolation: THREE.InterpolateLinear
-
-        }
-
-      ]
-
       // eslint-disable-next-line no-new
-      new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
+      // new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
       window.addEventListener('resize', this.onWindowResize, false)
     },
 

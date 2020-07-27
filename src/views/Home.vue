@@ -1,6 +1,7 @@
 <template>
   <div>
-    <RenderingSection />
+       <RenderingSection />
+
   </div>
 </template>
 
@@ -12,6 +13,7 @@ export default {
   name: 'Home',
   components: {
     RenderingSection
+
   }
 }
 </script>

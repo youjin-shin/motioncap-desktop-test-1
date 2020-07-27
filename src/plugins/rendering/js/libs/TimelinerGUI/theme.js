@@ -1,9 +1,9 @@
 const Theme = {
   // photoshop colors
-  a: '#343434',
-  b: '#535353',
-  c: '#b8b8b8',
-  d: '#d6d6d6'
+  a: '#1b1b1b', // base
+  b: '#222222', // light
+  c: '#b5b4b4', // lighter text
+  d: '#b5b4b4' // text
 }
 
 export { Theme }

@@ -32,7 +32,7 @@ function time_scaled () {
 
   tickMark1 = time_scale / div
   tickMark2 = 2 * tickMark1
-  tickMark3 = 8 * tickMark1
+  tickMark3 = 10 * tickMark1
 }
 
 time_scaled()

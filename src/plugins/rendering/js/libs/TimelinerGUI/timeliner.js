@@ -52,7 +52,7 @@ function Timeliner (controller) {
     scrollHeight: 0,
 
     totalTime: 20.0,
-    timeScale: 6,
+    timeScale: 60,
 
     currentTime: 0.0,
     scrollTime: 0.0,
@@ -354,15 +354,15 @@ function Timeliner (controller) {
     textAlign: 'left',
     lineHeight: '1em',
     position: 'absolute',
-    top: '22px'
+    top: '24px'
   })
 
   var pane = document.createElement('div')
 
   style(pane, {
     position: 'fixed',
-    top: '20px',
-    left: '20px',
+    top: '24px',
+    left: '24px',
     margin: 0,
     border: '1px solid ' + Theme.a,
     padding: 0,
@@ -370,8 +370,8 @@ function Timeliner (controller) {
     backgroundColor: Theme.a,
     color: Theme.d,
     zIndex: Z_INDEX,
-    fontFamily: 'monospace',
-    fontSize: '12px'
+    fontSize: '16px'
+
   })
 
   var header_styles = {
@@ -409,8 +409,9 @@ function Timeliner (controller) {
   pane_title.appendChild(top_right_bar)
 
   // resize minimize
-  // var resize_small = new IconButton(10, 'resize_small', 'minimize', dispatcher);
-  // top_right_bar.appendChild(resize_small.dom);
+  var resize_small = new IconButton(10, 'resize_small', 'minimize', dispatcher)
+  style(resize_small.dom, button_styles, { marginRight: '2px' })
+  top_right_bar.appendChild(resize_small.dom)
 
   // resize full
   var resize_full = new IconButton(10, 'resize_full', 'Maximize', dispatcher)
@@ -439,7 +440,7 @@ function Timeliner (controller) {
   pane.appendChild(pane_title)
 
   var label_status = document.createElement('span')
-  label_status.textContent = 'Hello!'
+  label_status.textContent = ''
   label_status.style.marginLeft = '10px'
 
   dispatcher.on('status', function (text) {
@@ -480,48 +481,46 @@ function Timeliner (controller) {
   pane_status.appendChild(label_status)
   pane_status.appendChild(bottom_right)
 
-  /*
-	// zoom in
-	var zoom_in = new IconButton(12, 'zoom_in', 'zoom in', dispatcher);
-	// zoom out
-	var zoom_out = new IconButton(12, 'zoom_out', 'zoom out', dispatcher);
-	// settings
-	var cog = new IconButton(12, 'cog', 'settings', dispatcher);
+  // zoom in
+  var zoom_in = new IconButton(12, 'zoom_in', 'zoom in', dispatcher)
+  // zoom out
+  var zoom_out = new IconButton(12, 'zoom_out', 'zoom out', dispatcher)
+  // settings
+  var cog = new IconButton(12, 'cog', 'settings', dispatcher)
 
-	// bottom_right.appendChild(zoom_in.dom);
-	// bottom_right.appendChild(zoom_out.dom);
-	// bottom_right.appendChild(cog.dom);
+  // bottom_right.appendChild(zoom_in.dom);
+  // bottom_right.appendChild(zoom_out.dom);
+  // bottom_right.appendChild(cog.dom);
 
-	// add layer
-	var plus = new IconButton(12, 'plus', 'New Layer', dispatcher);
-	plus.onClick(function() {
-		var name = prompt('Layer name?');
-		addLayer(name);
+  // add layer
+  var plus = new IconButton(12, 'plus', 'New Layer', dispatcher)
+  plus.onClick(function () {
+    // var name = prompt('Layer name?')
+    var name = 'test'
+    addLayer(name)
 
-		// undo_manager.save(new UndoState(data, 'Layer added'));
+    // undo_manager.save(new UndoState(data, 'Layer added'));
 
-		repaintAll();
-	});
-	style(plus.dom, button_styles);
-	bottom_right.appendChild(plus.dom);
+    repaintAll()
+  })
+  style(plus.dom, button_styles)
+  bottom_right.appendChild(plus.dom)
 
-	// trash
-	var trash = new IconButton(12, 'trash', 'Delete save', dispatcher);
-	trash.onClick(function() {
-		var name = data.get('name').value;
-		if (name && localStorage[STORAGE_PREFIX + name]) {
-			var ok = confirm('Are you sure you wish to delete ' + name + '?');
-			if (ok) {
-				delete localStorage[STORAGE_PREFIX + name];
-				dispatcher.fire('status', name + ' deleted');
-				dispatcher.fire('save:done');
-			}
-		}
-	});
-	style(trash.dom, button_styles, { marginRight: '2px' });
-	bottom_right.appendChild(trash.dom);
-
-*/
+  // trash
+  var trash = new IconButton(12, 'trash', 'Delete save', dispatcher)
+  trash.onClick(function () {
+    var name = data.get('name').value
+    if (name && localStorage[STORAGE_PREFIX + name]) {
+      var ok = confirm('Are you sure you wish to delete ' + name + '?')
+      if (ok) {
+        delete localStorage[STORAGE_PREFIX + name]
+        dispatcher.fire('status', name + ' deleted')
+        dispatcher.fire('save:done')
+      }
+    }
+  })
+  style(trash.dom, button_styles, { marginRight: '2px' })
+  bottom_right.appendChild(trash.dom)
 
   // pane_status.appendChild(document.createTextNode(' | TODO <Dock Full | Dock Botton | Snap Window Edges | zoom in | zoom out | Settings | help>'));
 
@@ -641,18 +640,17 @@ function Timeliner (controller) {
     right.style.left = LayoutConstants.LEFT_PANE_WIDTH + 'px'
   }
 
-  /*
-	function addLayer(name) {
-		var layer = new LayerProp(name);
+  // Need to fix
+  function addLayer (name) {
+    var layer = new LayerProp(name)
 
-		layers = layer_store.value;
-		layers.push(layer);
+    layers = layer_store.value
+    layers.push(layer)
 
-		layer_panel.updateState();
-	}
+    layer_panel.updateState()
+  }
 
-	this.addLayer = addLayer;
-*/
+  this.addLayer = addLayer
 
   this.dispose = function dispose () {
     var domParent = pane.parentElement
