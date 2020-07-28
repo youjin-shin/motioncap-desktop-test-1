@@ -20,8 +20,13 @@ import { TransformControls } from '@/plugins/rendering/jsm/controls/transformCon
 import { Timeliner } from '@/plugins/rendering/js/libs/TimelinerGUI/timeliner.js'
 import { TimelinerController } from 'three/examples/jsm/animation/TimelinerController.js'
 
+import { DragControls } from 'three/examples/jsm/controls/DragControls.js'
+
 var scene, renderer, camera, stats, grid
-var model, skeleton, mixer, clock, meshControls, cameraControls
+var model, skeleton, mixer, clock
+var transformControls, cameraControls, dragControls
+
+var enableSelection = false
 var crossFadeControls = []
 
 var idleWeight, walkWeight, runWeight
@@ -38,7 +43,8 @@ export default {
       settings: [],
       weights: [],
       trackInfo: [],
-      container: undefined
+      container: undefined,
+      objects: []
     }
   },
   mounted () {
@@ -52,6 +58,7 @@ export default {
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
       camera.position.set(3, 3, -5)
       clock = new THREE.Clock()
+      // scene.add(clock)
 
       scene = new THREE.Scene()
       scene.background = new THREE.Color(0x1b1b1b)
@@ -101,16 +108,12 @@ export default {
       // controls.enableDamping = true
 
       // Mesh Controller
-      meshControls = new TransformControls(camera, renderer.domElement)
-      meshControls.addEventListener('change', this.render)
-      meshControls.addEventListener('dragging-changed', function (event) {
+      transformControls = new TransformControls(camera, renderer.domElement)
+      transformControls.addEventListener('change', this.render)
+      transformControls.addEventListener('dragging-changed', function (event) {
         cameraControls.enabled = !event.value
       })
 
-      var geometry = new THREE.BoxBufferGeometry(1, 1, 1)
-      var material = new THREE.MeshBasicMaterial({ color: 0xffff00 })
-      var mesh = new THREE.Mesh(geometry, material)
-      mesh.name = 'MyBox'
       // scene.add(mesh)
 
       var loader = new GLTFLoader()
@@ -121,8 +124,9 @@ export default {
           // console.log(gltf)
           scene.add(model)
 
-          model.traverse(function (object) {
+          model.traverse((object) => {
             if (object.isMesh) object.castShadow = true
+            if (object.isBone) this.objects.push(object)
           })
 
           //
@@ -130,13 +134,13 @@ export default {
           skeleton = new THREE.SkeletonHelper(model)
           skeleton.visible = true
 
-          // skeleton.bones.forEach(element => {
-          //   // element.visible = false
-          //   console.log(element)
+          skeleton.bones.forEach(element => {
+            var mesh = new THREE.Mesh(new THREE.SphereGeometry(2), new THREE.MeshBasicMaterial({ color: 0xffffff }))
 
-          //   // meshControls.attach(element)
-          // })
-          // // skeleton.bones[4].visible = false
+            this.objects.push(element)
+            element.add(mesh)
+          })
+          // transformControls.attach(skeleton.bones[8])
           scene.add(skeleton)
 
           //
@@ -146,7 +150,7 @@ export default {
           var animations = gltf.animations
 
           mixer = new THREE.AnimationMixer(model)
-
+          // this.objects.push(model)
           // var jsonObject = JSON.stringify(animations[0])
           // console.log(jsonObject)
           animations.forEach(element => {
@@ -155,8 +159,8 @@ export default {
             }
           })
 
-          meshControls.attach(model)
-          scene.add(meshControls)
+          // transformControls.attach(model)
+          scene.add(transformControls)
 
           this.trackInfo = [
 
@@ -177,7 +181,7 @@ export default {
 
           ]
           // eslint-disable-next-line no-new
-          // new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
+          new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
 
           this.activateAllActions()
 
@@ -185,38 +189,79 @@ export default {
         })
       }
       // Event Listners
+      dragControls = new DragControls(this.objects, camera, renderer.domElement) //
+      console.log(this.objects)
+      dragControls.enabled = false
+      dragControls.addEventListener('hoveron', function (event) {
+        transformControls.attach(event.object.parent)
+        cancelHideTransform()
+      })
+
+      dragControls.addEventListener('hoveroff', function () {
+        delayHideTransform()
+      })
+
+      var hiding
+
+      function delayHideTransform () {
+        cancelHideTransform()
+        hideTransform()
+      }
+
+      function hideTransform () {
+        hiding = setTimeout(function () {
+          transformControls.detach(transformControls.object)
+        }, 2500)
+      }
+
+      function cancelHideTransform () {
+        if (hiding) clearTimeout(hiding)
+      }
+
+      // Hiding transform situation is a little in a mess :()
+      transformControls.addEventListener('change', function () {
+        cancelHideTransform()
+      })
+
+      transformControls.addEventListener('mouseDown', function () {
+        cancelHideTransform()
+      })
+
+      transformControls.addEventListener('mouseUp', function () {
+        delayHideTransform()
+      })
 
       window.addEventListener('keydown', function (event) {
         switch (event.keyCode) {
           case 81: // Q
-            meshControls.setSpace(meshControls.space === 'local' ? 'world' : 'local')
+            transformControls.setSpace(transformControls.space === 'local' ? 'world' : 'local')
             break
 
           case 91: // Ctrl
-            meshControls.setTranslationSnap(1)
-            meshControls.setRotationSnap(THREE.MathUtils.degToRad(15))
+            transformControls.setTranslationSnap(1)
+            transformControls.setRotationSnap(THREE.MathUtils.degToRad(15))
             break
 
           case 87: // W
-            meshControls.setMode('translate')
+            transformControls.setMode('translate')
             break
 
           case 69: // E
-            meshControls.setMode('rotate')
+            transformControls.setMode('rotate')
             break
 
           case 82: // R
-            meshControls.setMode('scale')
+            transformControls.setMode('scale')
             break
 
           case 187:
           case 107: // +, =, num+
-            meshControls.setSize(meshControls.size + 0.1)
+            transformControls.setSize(transformControls.size + 0.1)
             break
 
           case 189:
           case 109: // -, _, num-
-            meshControls.setSize(Math.max(meshControls.size - 0.1, 0.1))
+            transformControls.setSize(Math.max(transformControls.size - 0.1, 0.1))
             break
         }
       })
@@ -224,14 +269,14 @@ export default {
       window.addEventListener('keyup', function (event) {
         switch (event.keyCode) {
           case 91: // Ctrl
-            meshControls.setTranslationSnap(null)
-            meshControls.setRotationSnap(null)
+            transformControls.setTranslationSnap(null)
+            transformControls.setRotationSnap(null)
             break
         }
       })
 
       // eslint-disable-next-line no-new
-      // new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
+      new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
       window.addEventListener('resize', this.onWindowResize, false)
     },
 
