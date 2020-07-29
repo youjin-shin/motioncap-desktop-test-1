@@ -64,7 +64,7 @@ function Timeliner (controller) {
   }
   var timeline = new TimelinePanel(context)
   var layer_panel = new LayerCabinet(context)
-  console.log(layer_panel)
+  // console.log(layer_panel)
 
   var undo_manager = new UndoManager(dispatcher)
 

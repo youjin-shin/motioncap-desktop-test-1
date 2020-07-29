@@ -7,8 +7,10 @@
 
 <script>
 /* eslint-disable no-unused-vars */
+/* eslint-disable no-redeclare */
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { FBXLoader } from './jsm/loaders/FBXLoader.js'
 
 import Stats from 'three/examples/jsm/libs/stats.module.js'
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module.js'
@@ -18,9 +20,9 @@ import { OrbitControls } from '@/plugins/rendering/jsm/controls/cameraOrbitContr
 import { TransformControls } from '@/plugins/rendering/jsm/controls/transformControls.js'
 
 import { Timeliner } from '@/plugins/rendering/js/libs/TimelinerGUI/timeliner.js'
-import { TimelinerController } from 'three/examples/jsm/animation/TimelinerController.js'
+import { TimelinerController } from '@/plugins/rendering/jsm/controls/TimelinerController.js'
 
-import { DragControls } from 'three/examples/jsm/controls/DragControls.js'
+import { DragControls } from '@/plugins/rendering/jsm/controls/DragControls.js'
 
 var scene, renderer, camera, stats, grid
 var model, skeleton, mixer, clock
@@ -30,6 +32,7 @@ var enableSelection = false
 var crossFadeControls = []
 
 var idleWeight, walkWeight, runWeight
+var actionWeights = []
 
 var singleStepMode = false
 var sizeOfNextStep = 0
@@ -39,6 +42,8 @@ export default {
 
       isGUIOn: false,
       path: '/models/gltf/Soldier.glb',
+
+      // path: '/models/fbx/Zepeto.fbx',
       actions: [],
       settings: [],
       weights: [],
@@ -114,8 +119,6 @@ export default {
         cameraControls.enabled = !event.value
       })
 
-      // scene.add(mesh)
-
       var loader = new GLTFLoader()
       if (this.path !== undefined) {
         loader.load(this.path, (gltf) => {
@@ -126,7 +129,6 @@ export default {
 
           model.traverse((object) => {
             if (object.isMesh) object.castShadow = true
-            if (object.isBone) this.objects.push(object)
           })
 
           //
@@ -135,7 +137,10 @@ export default {
           skeleton.visible = true
 
           skeleton.bones.forEach(element => {
-            var mesh = new THREE.Mesh(new THREE.SphereGeometry(2), new THREE.MeshBasicMaterial({ color: 0xffffff }))
+            var materials = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.5, transparent: true })
+            materials.depthWrite = false
+            materials.depthTest = false
+            var mesh = new THREE.Mesh(new THREE.SphereGeometry(1.2), materials)
 
             this.objects.push(element)
             element.add(mesh)
@@ -144,20 +149,25 @@ export default {
           scene.add(skeleton)
 
           //
-          // if (!this.isGUIOn) { this.createPanel() }
 
           //
           var animations = gltf.animations
 
           mixer = new THREE.AnimationMixer(model)
-          // this.objects.push(model)
+
           // var jsonObject = JSON.stringify(animations[0])
           // console.log(jsonObject)
+
           animations.forEach(element => {
             if (element.name !== 'TPose') {
               this.actions.push(mixer.clipAction(element))
             }
           })
+
+          // if (!this.isGUIOn) { this.createPanel() }
+
+          this.activateAllActions()
+          this.animate()
 
           // transformControls.attach(model)
           scene.add(transformControls)
@@ -182,23 +192,23 @@ export default {
           ]
           // eslint-disable-next-line no-new
           new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
-
-          this.activateAllActions()
-
-          this.animate()
         })
       }
       // Event Listners
       dragControls = new DragControls(this.objects, camera, renderer.domElement) //
-      console.log(this.objects)
+
       dragControls.enabled = false
       dragControls.addEventListener('hoveron', function (event) {
-        transformControls.attach(event.object.parent)
+        enableSelection = true
+        window.addEventListener('click', () => {
+          if (enableSelection === true) { transformControls.attach(event.object.parent) }
+        })
+        enableSelection = false
         cancelHideTransform()
       })
 
       dragControls.addEventListener('hoveroff', function () {
-        delayHideTransform()
+        // delayHideTransform()
       })
 
       var hiding
@@ -210,8 +220,10 @@ export default {
 
       function hideTransform () {
         hiding = setTimeout(function () {
+          transformControls.object.children[transformControls.object.children.length - 1].material.opacity = 0.5
           transformControls.detach(transformControls.object)
-        }, 2500)
+          enableSelection = false
+        }, 0)
       }
 
       function cancelHideTransform () {
@@ -232,7 +244,11 @@ export default {
       })
 
       window.addEventListener('keydown', function (event) {
+        // console.log(event.keyCode)
         switch (event.keyCode) {
+          case 27: // ESC
+            hideTransform()
+            break
           case 81: // Q
             transformControls.setSpace(transformControls.space === 'local' ? 'world' : 'local')
             break
@@ -299,24 +315,37 @@ export default {
         'pause/continue': this.pauseContinue,
         'make single step': this.toSingleStepMode,
         'modify step size': 0.05,
-        'from walk to idle': () => {
-          this.prepareCrossFade(this.actions[1], this.actions[0], 1.0)
-        },
-        'from idle to walk': () => {
-          this.prepareCrossFade(this.actions[0], this.actions[1], 0.5)
-        },
-        'from walk to run': () => {
-          this.prepareCrossFade(this.actions[1], this.actions[2], 2.5)
-        },
-        'from run to walk': () => {
-          this.prepareCrossFade(this.actions[2], this.actions[1], 5.0)
-        },
+        // 'from Run to Idle': () => {
+        //   this.prepareCrossFade(this.actions[1], this.actions[0], 1.0)
+        // },
+        // 'from Idle to Run': () => {
+        //   this.prepareCrossFade(this.actions[0], this.actions[1], 0.5)
+        // },
+        // 'from Walk to Run': () => {
+        //   this.prepareCrossFade(this.actions[2], this.actions[1], 2.5)
+        // },
+        // 'from Run to Walk': () => {
+        //   this.prepareCrossFade(this.actions[1], this.actions[2], 5.0)
+        // },
         'use default duration': true,
         'set custom duration': 3.5,
-        'modify idle weight': 0.0,
-        'modify walk weight': 1.0,
-        'modify run weight': 0.0,
         'modify time scale': 1.0
+      }
+      //  'modify ' + this.actions[i]._clip.name + ' weight'
+
+      for (var i = 0; i < this.actions.length; i++) {
+        this.settings['modify ' + this.actions[i]._clip.name + ' weight'] = 0.0
+      }
+
+      for (var i = 0; i < this.actions.length - 1; i++) {
+        this.settings['from ' + this.actions[i]._clip.name + ' to ' + this.actions[i + 1]._clip.name] = () => {
+          this.prepareCrossFade(this.actions[i], this.actions[i + 1], 1.0)
+        }
+      }
+      for (var i = this.actions.length - 1; i > 0; i--) {
+        this.settings['from ' + this.actions[i]._clip.name + ' to ' + this.actions[i - 1]._clip.name] = () => {
+          this.prepareCrossFade(this.actions[i], this.actions[i - 1], 1.0)
+        }
       }
 
       folder1.add(this.settings, 'show model').onChange(this.showModel)
@@ -326,23 +355,21 @@ export default {
       folder3.add(this.settings, 'pause/continue')
       folder3.add(this.settings, 'make single step')
       folder3.add(this.settings, 'modify step size', -0.1, 0.1, 0.001)
-      crossFadeControls.push(folder4.add(this.settings, 'from' + ' walk' + ' to' + ' idle'))
-      crossFadeControls.push(folder4.add(this.settings, 'from idle to walk'))
-      crossFadeControls.push(folder4.add(this.settings, 'from walk to run'))
-      crossFadeControls.push(folder4.add(this.settings, 'from run to walk'))
+      for (var i = 0; i < this.actions.length - 1; i++) {
+        crossFadeControls.push(folder4.add(this.settings, 'from ' + this.actions[i]._clip.name + ' to ' + this.actions[i + 1]._clip.name))
+      }
+      for (var i = this.actions.length - 1; i > 0; i--) {
+        crossFadeControls.push(folder4.add(this.settings, 'from ' + this.actions[i]._clip.name + ' to ' + this.actions[i - 1]._clip.name))
+      }
       folder4.add(this.settings, 'use default duration')
       folder4.add(this.settings, 'set custom duration', 0, 10, 0.01)
-      folder5.add(this.settings, 'modify idle weight', 0.0, 1.0, 0.01).listen().onChange(function (weight) {
-        this.setWeight(this.actions[0], weight)
-      })
-      folder5.add(this.settings, 'modify walk weight', 0.0, 1.0, 0.01).listen().onChange(function (weight) {
-        this.setWeight(this.actions[1], weight)
-      })
-      folder5.add(this.settings, 'modify run weight', 0.0, 1.0, 0.01).listen().onChange(function (weight) {
-        this.setWeight(this.actions[2], weight)
-      })
-      folder6.add(this.settings, 'modify time scale', 0.0, 1.5, 0.01).onChange(this.modifyTimeScale)
 
+      for (var i = 0; i < this.actions.length; i++) {
+        folder5.add(this.settings, 'modify ' + this.actions[i]._clip.name + ' weight', 0.0, 1.0, 0.01).listen().onChange(function (weight) {
+          this.setWeight(this.actions[i], weight)
+        })
+      }
+      folder6.add(this.settings, 'modify time scale', 0.0, 1.5, 0.01).onChange(this.modifyTimeScale)
       folder1.open()
       folder2.open()
       folder3.open()
@@ -384,9 +411,9 @@ export default {
     },
 
     activateAllActions: function () {
-      this.setWeight(this.actions[0], this.settings['modify idle weight'])
-      this.setWeight(this.actions[1], this.settings['modify walk weight'])
-      this.setWeight(this.actions[2], this.settings['modify run weight'])
+      this.actions.forEach(element => {
+        this.setWeight(element, this.settings['modify' + element._clip.name + 'weight'])
+      })
 
       this.actions.forEach(function (action) {
         action.play()
@@ -490,9 +517,9 @@ export default {
     // Called by the render loop
 
     updateWeightSliders: function () {
-      this.settings['modify idle weight'] = idleWeight
-      this.settings['modify walk weight'] = walkWeight
-      this.settings['modify run weight'] = runWeight
+      for (var i = 0; i < this.actions.length; i++) {
+        this.settings['modify ' + this.actions[i]._clip.name + ' weight'] = actionWeights[i]
+      }
     },
     // Called by the render loop
 
@@ -501,16 +528,16 @@ export default {
         control.setDisabled()
       })
 
-      if (idleWeight === 1 && walkWeight === 0 && runWeight === 0) {
+      if (actionWeights[0] === 1 && actionWeights[2] === 0 && actionWeights[1] === 0) {
         crossFadeControls[1].setEnabled()
       }
 
-      if (idleWeight === 0 && walkWeight === 1 && runWeight === 0) {
+      if (actionWeights[0] === 0 && actionWeights[2] === 1 && actionWeights[1] === 0) {
         crossFadeControls[0].setEnabled()
         crossFadeControls[2].setEnabled()
       }
 
-      if (idleWeight === 0 && walkWeight === 0 && runWeight === 1) {
+      if (actionWeights[0] === 0 && actionWeights[2] === 0 && actionWeights[1] === 1) {
         crossFadeControls[3].setEnabled()
       }
     },
@@ -528,9 +555,9 @@ export default {
 
       requestAnimationFrame(this.animate)
 
-      idleWeight = this.actions[0].getEffectiveWeight()
-      walkWeight = this.actions[1].getEffectiveWeight()
-      runWeight = this.actions[2].getEffectiveWeight()
+      for (var i = 0; i < this.actions.length; i++) {
+        actionWeights[i] = this.actions[i].getEffectiveWeight()
+      }
 
       // Update the panel values if weights are modified from "outside" (by crossfadings)
 

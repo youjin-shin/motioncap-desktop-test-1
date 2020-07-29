@@ -1,10 +1,7 @@
-/* eslint-disable new-cap */
 /* eslint-disable no-redeclare */
 /* eslint-disable no-undef */
-/* eslint-disable no-unused-vars */
-/* eslint-disable camelcase */
 /* eslint-disable no-tabs */
-
+/* eslint-disable new-cap */
 /**
  * Controller class for the Timeliner GUI.
  *
@@ -26,8 +23,7 @@ import {
   AnimationMixer,
   AnimationUtils,
   PropertyBinding
-} from '../../../../../../../build/three.module.js'
-import { DataStore } from '../../js/lib/Timliner/utils/util_datastore.js'
+} from '../../../../../node_modules/three/build/three.module.js'
 
 var TimelinerController = function TimelinerController (scene, trackInfo, onUpdate) {
   this._scene = scene
@@ -42,8 +38,6 @@ var TimelinerController = function TimelinerController (scene, trackInfo, onUpda
   this._tracks = {}
   this._propRefs = {}
   this._channelNames = []
-
-  this._data = new DataStore()
 }
 
 TimelinerController.prototype = {
@@ -59,41 +53,45 @@ TimelinerController.prototype = {
 
       tracks.push(this._addTrack(spec.type, spec.propertyPath, spec.initialValue, spec.interpolation))
     }
-
+    this._tracks = tracks
     this._clip = new AnimationClip('editclip', 0, tracks)
-
-    for (let i = 0; i < tracks.length; i++) {
-      data.setValue('layers', {
-        name: i.name,
-        values: i.values
-      })
-    }
+    console.log(this._clip)
     this._action = this._mixer.clipAction(this._clip).play()
   },
 
   setDisplayTime: function (time) {
     this._action.time = time
-    this._mixer.update(0)
 
+    // console.log(time)
+    this._mixer.update(0)
     this._onUpdate()
   },
 
   setDuration: function (duration) {
     this._clip.duration = duration
   },
-  getChannels: function () {
-    return 	this._tracks
+  getTracks: function () {
+    return this._tracks
   },
   getChannelNames: function () {
     return this._channelNames
   },
 
   getChannelKeyTimes: function (channelName) {
-    return this._tracks[channelName].times
+    // console.log(this._tracks[ channelName ])
+    // for (let i = 0; i < this._tracks.length; i++) {
+    // 	if(this._tracks[i].name === channelName)
+    // 		return this._tracks[i].times;
+
+    // }
+    return this._tracks.find(item => item.name === channelName).times
+    // return this._tracks[ channelName ].times;
   },
 
   setKeyframe: function (channelName, time) {
-    var track = this._tracks[channelName]
+    // console.log(this._tracks.find(item=>item.name==channelName))
+    // var track = this._tracks[channelName]
+    var track = this._tracks.find(item => item.name === channelName)
     var times = track.times
     var index = Timeliner.binarySearch(times, time)
     var values = track.values
@@ -119,11 +117,15 @@ TimelinerController.prototype = {
     }
 
     times[index] = time
+
+    // this._propRefs.find(item=>item.name==channelName).getValue( values, offset );
     this._propRefs[channelName].getValue(values, offset)
   },
 
   delKeyframe: function (channelName, time) {
-    var track = this._tracks[channelName]
+    // var track = this._tracks[ channelName ],
+
+    var track = this._tracks.find(item => item.name === channelName)
     var times = track.times
     var index = Timeliner.binarySearch(times, time)
 
@@ -154,13 +156,16 @@ TimelinerController.prototype = {
   },
 
   moveKeyframe: function (channelName, time, delta, moveRemaining) {
-    var track = this._tracks[channelName]
+    // var track = this._tracks[ channelName ],
+
+    var track = this._tracks.find(item => item.name === channelName)
     var times = track.times
     var index = Timeliner.binarySearch(times, time)
 
     if (index >= 0) {
       var endAt = moveRemaining ? times.length : index + 1
-      var needsSort = times[index - 1] <= time || (!moveRemaining && time >= times[index + 1])
+      var needsSort = times[index - 1] <= time ||
+					(!moveRemaining && time >= times[index + 1])
 
       while (index !== endAt) times[index++] += delta
 
@@ -216,7 +221,8 @@ TimelinerController.prototype = {
   },
 
   _sort: function (track) {
-    var times = track.times; var order = AnimationUtils.getKeyframeOrder(times)
+    var times = track.times
+    var order = AnimationUtils.getKeyframeOrder(times)
 
     this._setArray(times, AnimationUtils.sortedArray(times, 1, order))
 
@@ -243,7 +249,7 @@ TimelinerController.prototype = {
 
     // for recording the state:
     this._propRefs[prop] =
-				new PropertyBinding(this._scene, prop)
+		new PropertyBinding(this._scene, prop)
 
     return track
   }
