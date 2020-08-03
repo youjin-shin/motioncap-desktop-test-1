@@ -10,7 +10,7 @@
 /* eslint-disable no-redeclare */
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-import { FBXLoader } from './jsm/loaders/FBXLoader.js'
+// import { FBXLoader } from './jsm/loaders/FBXLoader.js'
 
 import Stats from 'three/examples/jsm/libs/stats.module.js'
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module.js'
@@ -41,7 +41,7 @@ export default {
     return {
 
       isGUIOn: false,
-      path: '/models/gltf/Soldier.glb',
+      path: '/models/gltf/exo2.glb',
 
       // path: '/models/fbx/Zepeto.fbx',
       actions: [],
@@ -140,12 +140,12 @@ export default {
             var materials = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.5, transparent: true })
             materials.depthWrite = false
             materials.depthTest = false
-            var mesh = new THREE.Mesh(new THREE.SphereGeometry(1.2), materials)
+            var mesh = new THREE.Mesh(new THREE.SphereGeometry(0.2), materials)
 
             this.objects.push(element)
             element.add(mesh)
           })
-          // transformControls.attach(skeleton.bones[8])
+
           scene.add(skeleton)
 
           //
@@ -169,27 +169,29 @@ export default {
           this.activateAllActions()
           this.animate()
 
-          // transformControls.attach(model)
           scene.add(transformControls)
 
-          this.trackInfo = [
-
-            {
+          for (var i = 0; i < this.objects.length; i++) {
+            var vectorValue = Object.values(this.objects[i].position)
+            var quaternionValue = Object.values(this.objects[i].quaternion)
+            quaternionValue.pop()
+            this.trackInfo.push({
               type: THREE.VectorKeyframeTrack,
-              propertyPath: model.name + '.position',
-              initialValue: Object.values(model.position),
+              propertyPath: this.objects[i].name + '.position',
+              initialValue: vectorValue,
               interpolation: THREE.InterpolateSmooth
-            },
+            })
 
-            {
-              type: THREE.QuaternionKeyframeTrack,
-              propertyPath: model.name + '.quaternion',
-              initialValue: Object.values(model.quaternion),
-              interpolation: THREE.InterpolateLinear
+            this.trackInfo.push(
+              {
+                type: THREE.QuaternionKeyframeTrack,
+                propertyPath: this.objects[i].name + '.quaternion',
+                initialValue: quaternionValue,
+                interpolation: THREE.InterpolateLinear
 
-            }
+              })
+          }
 
-          ]
           // eslint-disable-next-line no-new
           new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
         })
@@ -199,11 +201,10 @@ export default {
 
       dragControls.enabled = false
       dragControls.addEventListener('hoveron', function (event) {
-        enableSelection = true
         window.addEventListener('click', () => {
-          if (enableSelection === true) { transformControls.attach(event.object.parent) }
+          transformControls.attach(event.object.parent)
         })
-        enableSelection = false
+
         cancelHideTransform()
       })
 
@@ -222,7 +223,6 @@ export default {
         hiding = setTimeout(function () {
           transformControls.object.children[transformControls.object.children.length - 1].material.opacity = 0.5
           transformControls.detach(transformControls.object)
-          enableSelection = false
         }, 0)
       }
 
@@ -292,7 +292,7 @@ export default {
       })
 
       // eslint-disable-next-line no-new
-      new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
+
       window.addEventListener('resize', this.onWindowResize, false)
     },
 
@@ -303,7 +303,7 @@ export default {
       var folder1 = panel.addFolder('Visibility')
       var folder2 = panel.addFolder('Activation/Deactivation')
       var folder3 = panel.addFolder('Pausing/Stepping')
-      var folder4 = panel.addFolder('Crossfading')
+      // var folder4 = panel.addFolder('Crossfading')
       var folder5 = panel.addFolder('Blend Weights')
       var folder6 = panel.addFolder('General Speed')
 
@@ -315,39 +315,15 @@ export default {
         'pause/continue': this.pauseContinue,
         'make single step': this.toSingleStepMode,
         'modify step size': 0.05,
-        // 'from Run to Idle': () => {
-        //   this.prepareCrossFade(this.actions[1], this.actions[0], 1.0)
-        // },
-        // 'from Idle to Run': () => {
-        //   this.prepareCrossFade(this.actions[0], this.actions[1], 0.5)
-        // },
-        // 'from Walk to Run': () => {
-        //   this.prepareCrossFade(this.actions[2], this.actions[1], 2.5)
-        // },
-        // 'from Run to Walk': () => {
-        //   this.prepareCrossFade(this.actions[1], this.actions[2], 5.0)
-        // },
         'use default duration': true,
         'set custom duration': 3.5,
+        // 'from idle to idle': () => {
+        //   this.prepareCrossFade(this.actions[0], this.actions[0], 1.0)
+        // },
+
+        'modify idle weight': 0.0,
         'modify time scale': 1.0
       }
-      //  'modify ' + this.actions[i]._clip.name + ' weight'
-
-      for (var i = 0; i < this.actions.length; i++) {
-        this.settings['modify ' + this.actions[i]._clip.name + ' weight'] = 0.0
-      }
-
-      for (var i = 0; i < this.actions.length - 1; i++) {
-        this.settings['from ' + this.actions[i]._clip.name + ' to ' + this.actions[i + 1]._clip.name] = () => {
-          this.prepareCrossFade(this.actions[i], this.actions[i + 1], 1.0)
-        }
-      }
-      for (var i = this.actions.length - 1; i > 0; i--) {
-        this.settings['from ' + this.actions[i]._clip.name + ' to ' + this.actions[i - 1]._clip.name] = () => {
-          this.prepareCrossFade(this.actions[i], this.actions[i - 1], 1.0)
-        }
-      }
-
       folder1.add(this.settings, 'show model').onChange(this.showModel)
       folder1.add(this.settings, 'show skeleton').onChange(this.showSkeleton)
       folder2.add(this.settings, 'deactivate all')
@@ -355,25 +331,17 @@ export default {
       folder3.add(this.settings, 'pause/continue')
       folder3.add(this.settings, 'make single step')
       folder3.add(this.settings, 'modify step size', -0.1, 0.1, 0.001)
-      for (var i = 0; i < this.actions.length - 1; i++) {
-        crossFadeControls.push(folder4.add(this.settings, 'from ' + this.actions[i]._clip.name + ' to ' + this.actions[i + 1]._clip.name))
-      }
-      for (var i = this.actions.length - 1; i > 0; i--) {
-        crossFadeControls.push(folder4.add(this.settings, 'from ' + this.actions[i]._clip.name + ' to ' + this.actions[i - 1]._clip.name))
-      }
-      folder4.add(this.settings, 'use default duration')
-      folder4.add(this.settings, 'set custom duration', 0, 10, 0.01)
 
-      for (var i = 0; i < this.actions.length; i++) {
-        folder5.add(this.settings, 'modify ' + this.actions[i]._clip.name + ' weight', 0.0, 1.0, 0.01).listen().onChange(function (weight) {
-          this.setWeight(this.actions[i], weight)
-        })
-      }
+      // crossFadeControls.push(folder4.add(this.settings, 'from' + ' idle' + ' to' + ' idle'))
+      folder5.add(this.settings, 'modify idle weight', 0.0, 1.0, 0.01).listen().onChange((weight) => {
+        this.setWeight(this.actions[0], weight)
+      })
+
       folder6.add(this.settings, 'modify time scale', 0.0, 1.5, 0.01).onChange(this.modifyTimeScale)
       folder1.open()
       folder2.open()
       folder3.open()
-      folder4.open()
+      // folder4.open()
       folder5.open()
       folder6.open()
 
@@ -414,6 +382,8 @@ export default {
       this.actions.forEach(element => {
         this.setWeight(element, this.settings['modify' + element._clip.name + 'weight'])
       })
+
+      // this.setWeight(this.actions[0], this.settings['modify idle weight'])
 
       this.actions.forEach(function (action) {
         action.play()
@@ -517,9 +487,10 @@ export default {
     // Called by the render loop
 
     updateWeightSliders: function () {
-      for (var i = 0; i < this.actions.length; i++) {
-        this.settings['modify ' + this.actions[i]._clip.name + ' weight'] = actionWeights[i]
-      }
+      this.settings['modify idle weight'] = actionWeights[0]
+      // for (var i = 0; i < this.actions.length; i++) {
+      //   this.settings['modify ' + this.actions[i]._clip.name + ' weight'] = actionWeights[i]
+      // }
     },
     // Called by the render loop
 
@@ -528,18 +499,9 @@ export default {
         control.setDisabled()
       })
 
-      if (actionWeights[0] === 1 && actionWeights[2] === 0 && actionWeights[1] === 0) {
-        crossFadeControls[1].setEnabled()
-      }
-
-      if (actionWeights[0] === 0 && actionWeights[2] === 1 && actionWeights[1] === 0) {
-        crossFadeControls[0].setEnabled()
-        crossFadeControls[2].setEnabled()
-      }
-
-      if (actionWeights[0] === 0 && actionWeights[2] === 0 && actionWeights[1] === 1) {
-        crossFadeControls[3].setEnabled()
-      }
+      // if (actionWeights[0] === 1) {
+      //   crossFadeControls[0].setEnabled()
+      // }
     },
 
     onWindowResize: function () {
@@ -554,7 +516,6 @@ export default {
       // Render loop
 
       requestAnimationFrame(this.animate)
-
       for (var i = 0; i < this.actions.length; i++) {
         actionWeights[i] = this.actions[i].getEffectiveWeight()
       }
@@ -581,7 +542,6 @@ export default {
       // Update the animation mixer, the stats panel, and render this frame
 
       mixer.update(mixerUpdateDelta)
-
       stats.update()
       this.render()
     },

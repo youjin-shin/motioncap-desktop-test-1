@@ -35,7 +35,7 @@ var TimelinerController = function TimelinerController (scene, trackInfo, onUpda
   this._clip = null
   this._action = null
 
-  this._tracks = {}
+  this._tracks = []
   this._propRefs = {}
   this._channelNames = []
 }
@@ -55,7 +55,7 @@ TimelinerController.prototype = {
     }
     this._tracks = tracks
     this._clip = new AnimationClip('editclip', 0, tracks)
-    console.log(this._clip)
+    // console.log(this._clip)
     this._action = this._mixer.clipAction(this._clip).play()
   },
 
@@ -90,6 +90,7 @@ TimelinerController.prototype = {
 
   setKeyframe: function (channelName, time) {
     // console.log(this._tracks.find(item=>item.name==channelName))
+    // console.log(this._tracks)
     // var track = this._tracks[channelName]
     var track = this._tracks.find(item => item.name === channelName)
     var times = track.times
@@ -118,7 +119,8 @@ TimelinerController.prototype = {
 
     times[index] = time
 
-    // this._propRefs.find(item=>item.name==channelName).getValue( values, offset );
+    // console.log(channelName)
+    // this._propRefs.channelName.getValue(values, offset)
     this._propRefs[channelName].getValue(values, offset)
   },
 
@@ -186,7 +188,7 @@ TimelinerController.prototype = {
 
     for (var i = 0, n = names.length; i !== n; ++i) {
       var name = names[i]
-      var track = tracks[name]
+      var track = tracks.find(item => item.name === name)
 
       channels[name] = {
 
@@ -199,21 +201,50 @@ TimelinerController.prototype = {
     return result
   },
 
+  // deserialize: function (structs) {
+  //   var names = this._channelNames
+  //   var tracks = this._tracks
+
+  //   var channels = structs.channels
+
+  //   this.setDuration(structs.duration)
+
+  //   for (var i = 0, n = names.length; i !== n; ++i) {
+  //     var name = names[i]
+  //     var track = tracks.find(item => item.name === name)
+  //     var data = channels[name]
+
+  //     this._setArray(track.times, data.times)
+  //     this._setArray(track.values, data.values)
+  //   }
+
+  //   // update display
+  //   this.setDisplayTime(this._mixer.time)
+  // },
+
   deserialize: function (structs) {
     var names = this._channelNames
     var tracks = this._tracks
 
-    var channels = structs.channels
-
+    var channels = []
+    // var channels = structs.tracks
+    for (var i = 0; i < structs.tracks.length; i++) {
+      if (structs.tracks[i].name.includes('.position') || structs.tracks[i].name.includes('.quaternion')) {
+        channels.push(structs.tracks[i])
+      }
+    }
+    console.log(channels)
     this.setDuration(structs.duration)
 
     for (var i = 0, n = names.length; i !== n; ++i) {
       var name = names[i]
-      var track = tracks[name]
-      var data = channels[name]
-
-      this._setArray(track.times, data.times)
-      this._setArray(track.values, data.values)
+      var track = tracks.find(item => item.name === name)
+      var data = channels[i]
+      var timeData = Object.keys(data.times).map((key) => data.times[key])
+      console.log(timeData)
+      var valueData = Object.keys(data.values).map((key) => data.values[key])
+      this._setArray(track.times, timeData)
+      this._setArray(track.values, valueData)
     }
 
     // update display
