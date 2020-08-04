@@ -3,7 +3,7 @@ var DEFAULT_TIME_SCALE = 60
 
 // Dimensions
 var LayoutConstants = {
-  LINE_HEIGHT: 26,
+  LINE_HEIGHT: 28,
   DIAMOND_SIZE: 10,
   MARKER_TRACK_HEIGHT: 60,
   // WIDTH: window.innerWidth,

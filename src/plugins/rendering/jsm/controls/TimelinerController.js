@@ -201,27 +201,6 @@ TimelinerController.prototype = {
     return result
   },
 
-  // deserialize: function (structs) {
-  //   var names = this._channelNames
-  //   var tracks = this._tracks
-
-  //   var channels = structs.channels
-
-  //   this.setDuration(structs.duration)
-
-  //   for (var i = 0, n = names.length; i !== n; ++i) {
-  //     var name = names[i]
-  //     var track = tracks.find(item => item.name === name)
-  //     var data = channels[name]
-
-  //     this._setArray(track.times, data.times)
-  //     this._setArray(track.values, data.values)
-  //   }
-
-  //   // update display
-  //   this.setDisplayTime(this._mixer.time)
-  // },
-
   deserialize: function (structs) {
     var names = this._channelNames
     var tracks = this._tracks
@@ -250,6 +229,27 @@ TimelinerController.prototype = {
     // update display
     this.setDisplayTime(this._mixer.time)
   },
+
+  // deserialize: function (structs) {
+  //   var names = this._channelNames
+  //   var tracks = this._tracks
+
+  //   var channels = structs.channels
+
+  //   this.setDuration(structs.duration)
+
+  //   for (var i = 0, n = names.length; i !== n; ++i) {
+  //     var name = names[i]
+  //     var track = tracks.find(item => item.name === name)
+  //     var data = channels[name]
+
+  //     this._setArray(track.times, data.times)
+  //     this._setArray(track.values, data.values)
+  //   }
+
+  //   // update display
+  //   this.setDisplayTime(this._mixer.time)
+  // },
 
   _sort: function (track) {
     var times = track.times

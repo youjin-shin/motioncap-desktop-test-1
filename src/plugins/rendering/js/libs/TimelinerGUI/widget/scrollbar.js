@@ -5,7 +5,7 @@
 // var SimpleEvent = require('./do')
 import { Do as SimpleEvent } from './do.js'
 import { utils } from '../utils.js'
-
+import { Theme } from '../theme.js'
 // ********** class: ScrollBar ****************** //
 /*
 	Simple UI widget that displays a scrolltrack
@@ -17,24 +17,27 @@ var scrolltrack_style = {
   // float: 'right',
   position: 'absolute',
   // right: '0',
-  // top: '0',
   // bottom: '0',
-  background: '-webkit-gradient(linear, left top, right top, color-stop(0, rgb(29,29,29)), color-stop(0.6, rgb(50,50,50)) )',
-  border: '1px solid rgb(29, 29, 29)',
+  // background: '-webkit-gradient(linear, left top, right top, color-stop(0, rgb(50,50,50)), color-stop(0.6, rgb(50,50,50)) )',
+  background: Theme.b,
+  // border: '1px solid rgb(29, 29, 29)',
+
   // zIndex: '1000',
   textAlign: 'center',
   cursor: 'pointer'
 }
 
 var scrollbar_style = {
-  background: '-webkit-gradient(linear, left top, right top, color-stop(0.2, rgb(88,88,88)), color-stop(0.6, rgb(64,64,64)) )',
-  border: '1px solid rgb(25,25,25)',
+  background: Theme.d,
+  // background: '-webkit-gradient(linear, left top, right top, color-stop(0.2, rgb(88,88,88)), color-stop(0.6, rgb(88,88,88)) )',
+  // border: '1px solid rgb(25,25,25)',
   // position: 'absolute',
   position: 'relative',
   borderRadius: '6px'
 }
 
 function ScrollBar (h, w, dispatcher) {
+  var last_pos = 0
   var SCROLLBAR_WIDTH = w || 12
   var SCROLLBAR_MARGIN = 3
   var SCROLL_WIDTH = SCROLLBAR_WIDTH + SCROLLBAR_MARGIN * 2
@@ -47,7 +50,7 @@ function ScrollBar (h, w, dispatcher) {
   scrolltrack.style.height = scrolltrackHeight + 'px'
   scrolltrack.style.width = SCROLL_WIDTH + 'px'
 
-  // var scrollTop = 0;
+  var scrollTop = 0
   var scrollbar = document.createElement('div')
   // scrollbar.className = 'scrollbar';
   utils.style(scrollbar, scrollbar_style)
@@ -73,7 +76,6 @@ function ScrollBar (h, w, dispatcher) {
 
   this.setHeight = function (height) {
     h = height
-
     scrolltrackHeight = h - 2
     scrolltrack.style.height = scrolltrackHeight + 'px'
   }
@@ -83,7 +85,7 @@ function ScrollBar (h, w, dispatcher) {
     p = Math.max(Math.min(1, p), 0)
     var emptyTrack = scrolltrackHeight - bar_length
     bar_y = p * emptyTrack
-    scrollbar.style.top = bar_y
+    scrollbar.style.top = bar_y + 'px'
   }
 
   this.setLength(1)
@@ -94,7 +96,6 @@ function ScrollBar (h, w, dispatcher) {
 
   function onDown (event) {
     event.preventDefault()
-
     if (event.target === scrollbar) {
       mouse_down_grip = event.clientY
       document.addEventListener('mousemove', onMove, false)
@@ -106,7 +107,7 @@ function ScrollBar (h, w, dispatcher) {
         me.onScroll.fire('pagedown')
       }
       // if want to drag scroller to empty track instead
-      // me.setPosition(event.clientY / (scrolltrackHeight - 1));
+      // me.setPosition(event.clientY / (scrolltrackHeight - 1))
     }
   }
 
