@@ -70,6 +70,7 @@ function Timeliner (controller) {
 
   var scrollbar = new ScrollBar(0, 10)
 
+  // var div = document.createElement('div')
   var div = document.createElement('div')
 
   controller.setDuration(context.totalTime)

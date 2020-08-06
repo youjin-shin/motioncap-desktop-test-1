@@ -19,8 +19,8 @@ import { OrbitControls } from '@/plugins/rendering/jsm/controls/cameraOrbitContr
 // import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 import { TransformControls } from '@/plugins/rendering/jsm/controls/transformControls.js'
 
-import { Timeliner } from '@/plugins/rendering/js/libs/TimelinerGUI/timeliner.js'
-import { TimelinerController } from '@/plugins/rendering/jsm/controls/TimelinerController.js'
+// import { Timeliner } from '@/plugins/rendering/js/libs/TimelinerGUI/timeliner.js'
+// import { TimelinerController } from '@/plugins/rendering/jsm/controls/TimelinerController.js'
 
 import { DragControls } from '@/plugins/rendering/jsm/controls/DragControls.js'
 
@@ -37,6 +37,8 @@ var actionWeights = []
 var singleStepMode = false
 var sizeOfNextStep = 0
 export default {
+  components: {
+  },
   data () {
     return {
 
@@ -59,7 +61,6 @@ export default {
   },
   methods: {
     init () {
-      // container = document.getElementById('container')
       this.container = this.$refs.container
 
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
@@ -166,36 +167,40 @@ export default {
             }
           })
 
-          if (!this.isGUIOn) { this.createPanel() }
+          // if (!this.isGUIOn) { this.createPanel() }
 
           this.activateAllActions()
           this.animate()
 
           scene.add(transformControls)
 
-          for (var i = 0; i < this.objects.length; i++) {
-            var vectorValue = Object.values(this.objects[i].position)
-            var quaternionValue = Object.values(this.objects[i].quaternion)
-            quaternionValue.pop()
-            this.trackInfo.push({
-              type: THREE.VectorKeyframeTrack,
-              propertyPath: this.objects[i].name + '.position',
-              initialValue: vectorValue,
-              interpolation: THREE.InterpolateSmooth
-            })
+          // for (var i = 0; i < this.objects.length; i++) {
+          //   var vectorValue = Object.values(this.objects[i].position)
+          //   var quaternionValue = Object.values(this.objects[i].quaternion)
+          //   quaternionValue.pop()
+          //   this.trackInfo.push({
+          //     type: THREE.VectorKeyframeTrack,
+          //     propertyPath: this.objects[i].name + '.position',
+          //     initialValue: vectorValue,
+          //     interpolation: THREE.InterpolateSmooth
+          //   })
 
-            this.trackInfo.push(
-              {
-                type: THREE.QuaternionKeyframeTrack,
-                propertyPath: this.objects[i].name + '.quaternion',
-                initialValue: quaternionValue,
-                interpolation: THREE.InterpolateLinear
+          //   this.trackInfo.push(
+          //     {
+          //       type: THREE.QuaternionKeyframeTrack,
+          //       propertyPath: this.objects[i].name + '.quaternion',
+          //       initialValue: quaternionValue,
+          //       interpolation: THREE.InterpolateLinear
 
-              })
-          }
+          //     })
+          // }
 
-          // eslint-disable-next-line no-new
-          new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
+          // console.log(this.trackInfo)
+
+          // // eslint-disable-next-line no-new
+          // new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
+
+          this.$emit('initTimeline', scene, this.objects, this.render)
         })
       }
       // Event Listners

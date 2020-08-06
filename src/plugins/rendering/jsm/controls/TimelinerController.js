@@ -23,11 +23,13 @@ import {
   AnimationMixer,
   AnimationUtils,
   PropertyBinding
-} from '../../../../../node_modules/three/build/three.module.js'
+// } from '../../../../../node_modules/three/build/three.module.js'
+} from '../../build/three.module'
 
-var TimelinerController = function TimelinerController (scene, trackInfo, onUpdate) {
+var TimelinerController = function TimelinerController (scene, trackInfo, onUpdate, container) {
   this._scene = scene
   this._trackInfo = trackInfo
+  this._container = container
 
   this._onUpdate = onUpdate
 
@@ -69,6 +71,9 @@ TimelinerController.prototype = {
 
   setDuration: function (duration) {
     this._clip.duration = duration
+  },
+  getContainer: function () {
+    return this._container
   },
   getTracks: function () {
     return this._tracks
