@@ -4,7 +4,7 @@
   >
   <div class="text-center">
     <v-menu open-on-hover offset-y>
-      <template v-slot:activator="{ on, attrs }">
+      <template v-slot:activato r="{ on, attrs }">
    <v-btn text
     v-bind="attrs"
     v-on="on">
