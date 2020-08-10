@@ -1,58 +1,35 @@
 /* eslint-disable vue/no-unused-components */
 <template>
   <v-container>
-    <v-layout row wrap>
-      <v-flex lg2 order-lg1>
-        <v-card tile flat class="ma-0 pa-0">
+    <!--  class="ma-0 pa-0" -->
+    <v-row fill-height="100%">
+      <v-col cols="2.5" class="ma-0 pa-0" fill-height="100%">
           <div>
-            <Samples />
-          </div>
-        </v-card>
-      </v-flex>
-      <v-flex lg8 order-lg2>
-        <v-card fluid class="ma-0 pa-0">
-          <div>
-          <RenderingSection />
-          </div>
-        </v-card>
-      </v-flex>
-      <v-flex lg2 order-lg3>
-        <v-card fluid class="ma-0 pa-0">
-          <div>
-          <Rigging />
-          </div>
-        </v-card>
-      </v-flex>
-    </v-layout>
-
-    <v-layout row wrap>
-          <v-flex lg10 order-lg2>
-        <v-card depressed
-        class="ma-0 pa-0"
-        weight="auto"
-        max-height="auto">
-        <div>
-          <Track />
-        </div>
-        </v-card>
-      </v-flex>
-    </v-layout>
-
-      <v-flex lg2 order-lg1>
-        <v-card fluid
-        class="ma-0 pa-0">
-          <div>
-            <Body />
+            <Samples fill-height="100%" />
           </div>
 
-        </v-card>
-      </v-flex>
-
-      <v-flex lg2 order-lg3>
-        <v-card fluid
-        class="ma-0 pa-0">
-        </v-card>
-      </v-flex>
+      </v-col >
+      <v-col fill-height="100%" cols="7"  class="ma-0 pa-0" height="100%">
+          <div>
+          <RenderingSection fill-height="100%" />
+          </div>
+      </v-col>
+      <v-col cols="2.5" class="ma-0 pa-0" fill-height="100%">
+          <div>
+          <Properties fill-height="100%" />
+          </div>
+      </v-col>
+    </v-row>
+    <v-row>
+      <!--타임라이너 -->
+          <!-- <v-col cols="6" class="ma-0 pa-0" height="100"> -->
+        <!-- <v-card class="ma-0 pa-0"> -->
+        <!-- <div> -->
+      <!-- <Timeliner /> -->
+      <!-- </div> -->
+      <!-- </v-card> -->
+            <!-- </v-col> -->
+    </v-row>
   </v-container>
 </template>
 
@@ -60,14 +37,15 @@
 // @ is an alias to /src
 import RenderingSection from '@/components/Rendering/RenderingSection.vue'
 import Samples from '@/components/Samples.vue'
-import Body from '@/components/Body.vue'
-import Rigging from '@/components/Rigging.vue'
-import Track from '@/components/Track.vue'
+import Properties from '@/components/Properties.vue'
+// import Directory from '@/components/Directory.vue'
+// import Timeliner from '@/components/Rendering/Timeliner.vue'
 
 export default {
   name: 'Home',
   components: {
-    RenderingSection, Samples, Body, Rigging, Track
+    RenderingSection, Samples, Properties
+    // , Directory
   }
 }
 </script>
