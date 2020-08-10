@@ -19,8 +19,8 @@ import { OrbitControls } from '@/plugins/rendering/jsm/controls/cameraOrbitContr
 // import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 import { TransformControls } from '@/plugins/rendering/jsm/controls/transformControls.js'
 
-import { Timeliner } from '@/plugins/rendering/js/libs/TimelinerGUI/timeliner.js'
-import { TimelinerController } from '@/plugins/rendering/jsm/controls/TimelinerController.js'
+// import { Timeliner } from '@/plugins/rendering/js/libs/TimelinerGUI/timeliner.js'
+// import { TimelinerController } from '@/plugins/rendering/jsm/controls/TimelinerController.js'
 
 import { DragControls } from '@/plugins/rendering/jsm/controls/DragControls.js'
 
@@ -37,14 +37,18 @@ var actionWeights = []
 var singleStepMode = false
 var sizeOfNextStep = 0
 export default {
+  components: {
+  },
   data () {
     return {
 
       isGUIOn: false,
       path: '/models/gltf/exo2.glb',
+      // path: '/models/gltf/Soldier.glb',
 
       // path: '/models/fbx/Zepeto.fbx',
       actions: [],
+      bonePivotSize: 0.2,
       settings: [],
       weights: [],
       trackInfo: [],
@@ -57,7 +61,6 @@ export default {
   },
   methods: {
     init () {
-      // container = document.getElementById('container')
       this.container = this.$refs.container
 
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
@@ -133,6 +136,7 @@ export default {
 
           //
 
+          console.log(model)
           skeleton = new THREE.SkeletonHelper(model)
           skeleton.visible = true
 
@@ -140,8 +144,7 @@ export default {
             var materials = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.5, transparent: true })
             materials.depthWrite = false
             materials.depthTest = false
-            var mesh = new THREE.Mesh(new THREE.SphereGeometry(0.2), materials)
-
+            var mesh = new THREE.Mesh(new THREE.SphereGeometry(this.bonePivotSize), materials)
             this.objects.push(element)
             element.add(mesh)
           })
@@ -171,29 +174,33 @@ export default {
 
           scene.add(transformControls)
 
-          for (var i = 0; i < this.objects.length; i++) {
-            var vectorValue = Object.values(this.objects[i].position)
-            var quaternionValue = Object.values(this.objects[i].quaternion)
-            quaternionValue.pop()
-            this.trackInfo.push({
-              type: THREE.VectorKeyframeTrack,
-              propertyPath: this.objects[i].name + '.position',
-              initialValue: vectorValue,
-              interpolation: THREE.InterpolateSmooth
-            })
+          // for (var i = 0; i < this.objects.length; i++) {
+          //   var vectorValue = Object.values(this.objects[i].position)
+          //   var quaternionValue = Object.values(this.objects[i].quaternion)
+          //   quaternionValue.pop()
+          //   this.trackInfo.push({
+          //     type: THREE.VectorKeyframeTrack,
+          //     propertyPath: this.objects[i].name + '.position',
+          //     initialValue: vectorValue,
+          //     interpolation: THREE.InterpolateSmooth
+          //   })
 
-            this.trackInfo.push(
-              {
-                type: THREE.QuaternionKeyframeTrack,
-                propertyPath: this.objects[i].name + '.quaternion',
-                initialValue: quaternionValue,
-                interpolation: THREE.InterpolateLinear
+          //   this.trackInfo.push(
+          //     {
+          //       type: THREE.QuaternionKeyframeTrack,
+          //       propertyPath: this.objects[i].name + '.quaternion',
+          //       initialValue: quaternionValue,
+          //       interpolation: THREE.InterpolateLinear
 
-              })
-          }
+          //     })
+          // }
 
-          // eslint-disable-next-line no-new
-          new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
+          // console.log(this.trackInfo)
+
+          // // eslint-disable-next-line no-new
+          // new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
+
+          this.$emit('initTimeline', scene, this.objects, this.render)
         })
       }
       // Event Listners
@@ -305,7 +312,7 @@ export default {
       var folder3 = panel.addFolder('Pausing/Stepping')
       // var folder4 = panel.addFolder('Crossfading')
       var folder5 = panel.addFolder('Blend Weights')
-      var folder6 = panel.addFolder('General Speed')
+      var folder6 = panel.addFolder('General Values')
 
       this.settings = {
         'show model': true,
@@ -322,6 +329,7 @@ export default {
         // },
 
         'modify idle weight': 0.0,
+        'modify bonePivot scale': 1.0,
         'modify time scale': 1.0
       }
       folder1.add(this.settings, 'show model').onChange(this.showModel)
@@ -338,6 +346,7 @@ export default {
       })
 
       folder6.add(this.settings, 'modify time scale', 0.0, 1.5, 0.01).onChange(this.modifyTimeScale)
+      folder6.add(this.settings, 'modify bonePivot scale', 0.0, 2, 0.01).onChange(this.modifybonePivotScale)
       folder1.open()
       folder2.open()
       folder3.open()
@@ -371,6 +380,9 @@ export default {
 
     modifyTimeScale: function (speed) {
       mixer.timeScale = speed
+    },
+    modifybonePivotScale: function (scale) {
+      this.bonePivotSize = scale
     },
     deactivateAllActions: function () {
       this.actions.forEach(function (action) {

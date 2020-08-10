@@ -1,5 +1,6 @@
 /* eslint-disable vue/no-unused-components */
 <template>
+
   <v-container>
     <!--  class="ma-0 pa-0" -->
     <v-row fill-height="100%">
@@ -30,22 +31,46 @@
       <!-- </v-card> -->
             <!-- </v-col> -->
     </v-row>
-  </v-container>
+  </v-container
 </template>
 
 <script>
 // @ is an alias to /src
 import RenderingSection from '@/components/Rendering/RenderingSection.vue'
+
 import Samples from '@/components/Samples.vue'
 import Properties from '@/components/Properties.vue'
 // import Directory from '@/components/Directory.vue'
 // import Timeliner from '@/components/Rendering/Timeliner.vue'
+=======
+import TimelineSection from '@/components/Rendering/Timeliner.vue'
+>>>>>>> develop
 
 export default {
   name: 'Home',
   components: {
+<<<<<<< feature
     RenderingSection, Samples, Properties
     // , Directory
+=======
+    RenderingSection,
+    // eslint-disable-next-line vue/no-unused-components
+    TimelineSection
+
+  },
+  data () {
+    return {
+      isTimelinerInit: false,
+      objects: [],
+      scene: undefined,
+      render: undefined
+    }
+  },
+  methods: {
+    initTimeline (scene, objects, render) {
+      this.$refs.TimelineSection.init(scene, objects, render)
+    }
+>>>>>>> develop
   }
 }
 </script>

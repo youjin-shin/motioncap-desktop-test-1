@@ -70,6 +70,7 @@ function Timeliner (controller) {
 
   var scrollbar = new ScrollBar(0, 10)
 
+  // var div = document.createElement('div')
   var div = document.createElement('div')
 
   controller.setDuration(context.totalTime)
@@ -457,26 +458,26 @@ function Timeliner (controller) {
     textAlign: 'right'
   })
 
-  // var button_save = document.createElement('button');
-  // style(button_save, button_styles);
-  // button_save.textContent = 'Save';
-  // button_save.onclick = function() {
-  // 	save();
-  // };
+  // var button_save = document.createElement('button')
+  // style(button_save, button_styles)
+  // button_save.textContent = 'Save'
+  // button_save.onclick = function () {
+  //   save()
+  // }
 
-  // var button_load = document.createElement('button');
-  // style(button_load, button_styles);
-  // button_load.textContent = 'Import';
-  // button_load.onclick = this.promptLoad;
+  // var button_load = document.createElement('button')
+  // style(button_load, button_styles)
+  // button_load.textContent = 'Import'
+  // button_load.onclick = this.promptLoad
 
-  // var button_open = document.createElement('button');
-  // style(button_open, button_styles);
-  // button_open.textContent = 'Open';
-  // button_open.onclick = this.promptOpen;
+  // var button_open = document.createElement('button')
+  // style(button_open, button_styles)
+  // button_open.textContent = 'Open'
+  // button_open.onclick = this.promptOpen
 
-  // bottom_right.appendChild(button_load);
-  // bottom_right.appendChild(button_save);
-  // bottom_right.appendChild(button_open);
+  // bottom_right.appendChild(button_load)
+  // bottom_right.appendChild(button_save)
+  // bottom_right.appendChild(button_open)
 
   pane_status.appendChild(label_status)
   pane_status.appendChild(bottom_right)
@@ -488,39 +489,39 @@ function Timeliner (controller) {
   // settings
   var cog = new IconButton(12, 'cog', 'settings', dispatcher)
 
-  // bottom_right.appendChild(zoom_in.dom);
-  // bottom_right.appendChild(zoom_out.dom);
-  // bottom_right.appendChild(cog.dom);
+  bottom_right.appendChild(zoom_in.dom)
+  bottom_right.appendChild(zoom_out.dom)
+  bottom_right.appendChild(cog.dom)
 
-  // add layer
-  var plus = new IconButton(12, 'plus', 'New Layer', dispatcher)
-  plus.onClick(function () {
-    // var name = prompt('Layer name?')
-    var name = 'test'
-    addLayer(name)
+  // // add layer
+  // var plus = new IconButton(12, 'plus', 'New Layer', dispatcher)
+  // plus.onClick(function () {
+  //   // var name = prompt('Layer name?')
+  //   var name = 'test'
+  //   addLayer(name)
 
-    // undo_manager.save(new UndoState(data, 'Layer added'));
+  //   // undo_manager.save(new UndoState(data, 'Layer added'));
 
-    repaintAll()
-  })
-  style(plus.dom, button_styles)
-  bottom_right.appendChild(plus.dom)
+  //   repaintAll()
+  // })
+  // style(plus.dom, button_styles)
+  // bottom_right.appendChild(plus.dom)
 
-  // trash
-  var trash = new IconButton(12, 'trash', 'Delete save', dispatcher)
-  trash.onClick(function () {
-    var name = data.get('name').value
-    if (name && localStorage[STORAGE_PREFIX + name]) {
-      var ok = confirm('Are you sure you wish to delete ' + name + '?')
-      if (ok) {
-        delete localStorage[STORAGE_PREFIX + name]
-        dispatcher.fire('status', name + ' deleted')
-        dispatcher.fire('save:done')
-      }
-    }
-  })
-  style(trash.dom, button_styles, { marginRight: '2px' })
-  bottom_right.appendChild(trash.dom)
+  // // trash
+  // var trash = new IconButton(12, 'trash', 'Delete save', dispatcher)
+  // trash.onClick(function () {
+  //   var name = data.get('name').value
+  //   if (name && localStorage[STORAGE_PREFIX + name]) {
+  //     var ok = confirm('Are you sure you wish to delete ' + name + '?')
+  //     if (ok) {
+  //       delete localStorage[STORAGE_PREFIX + name]
+  //       dispatcher.fire('status', name + ' deleted')
+  //       dispatcher.fire('save:done')
+  //     }
+  //   }
+  // })
+  // style(trash.dom, button_styles, { marginRight: '2px' })
+  // bottom_right.appendChild(trash.dom)
 
   // pane_status.appendChild(document.createTextNode(' | TODO <Dock Full | Dock Botton | Snap Window Edges | zoom in | zoom out | Settings | help>'));
 
@@ -592,7 +593,7 @@ function Timeliner (controller) {
     var undo = e.metaKey && e.keyCode === 91 && !e.shiftKey
 
     var active = document.activeElement
-    // console.log( active.nodeName );
+    // console.log(active.nodeName)
 
     if (active.nodeName.match(/(INPUT|BUTTON|SELECT)/)) {
       active.blur()

@@ -224,7 +224,7 @@ function TimelinePanel (context) {
     ctx.rect(0, 5, w, h)
     ctx.fill()
 
-    ctx.fillStyle = Theme.c // 'yellow';
+    ctx.fillStyle = Theme.d // 'yellow';
 
     ctx.beginPath()
     ctx.rect(scroller.left, 5, scroller.grip_length, h)
@@ -355,7 +355,7 @@ function TimelinePanel (context) {
       ctx.lineTo(x, height)
       ctx.stroke()
 
-      ctx.fillStyle = Theme.d
+      ctx.fillStyle = Theme.c
       ctx.textAlign = 'center'
 
       var t = (i * units - offsetUnits) / time_scale + frame_start
