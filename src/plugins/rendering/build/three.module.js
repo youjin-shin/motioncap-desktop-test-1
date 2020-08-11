@@ -25105,14 +25105,12 @@ function WebGLRenderer( parameters ) {
 		_canvas.width = Math.floor( width * _pixelRatio );
 		_canvas.height = Math.floor( height * _pixelRatio );
 
-		// Need to Fix
 		if ( updateStyle !== false ) {
 
 			_canvas.style.width = 100 + '%';
 			_canvas.style.height = 100 + '%';
 
 		}
-
 		this.setViewport( 0, 0, width, height );
 
 	};

@@ -1,59 +1,69 @@
-/* eslint-disable vue/no-unused-components */
 <template>
+<v-container
+  class="main-container px-7"
+  fluid
+  fill-height
+>
+<v-layout row wrap>
 
-  <v-container>
-    <!--  class="ma-0 pa-0" -->
-    <v-row fill-height="100%">
-      <v-col cols="2.5" class="ma-0 pa-0" fill-height="100%">
-          <div>
-            <Samples fill-height="100%" />
-          </div>
+  <v-row >
+    <v-col cols="2.5" class="pa-1">
+      <div class="section-card ">
+      <!-- <Samples /> -->
+      </div>
+    </v-col>
 
-      </v-col >
-      <v-col fill-height="100%" cols="7"  class="ma-0 pa-0" height="100%">
-          <div>
-          <RenderingSection fill-height="100%" />
-          </div>
-      </v-col>
-      <v-col cols="2.5" class="ma-0 pa-0" fill-height="100%">
-          <div>
-          <Properties fill-height="100%" />
-          </div>
-      </v-col>
-    </v-row>
-    <v-row>
-      <!--타임라이너 -->
-          <!-- <v-col cols="6" class="ma-0 pa-0" height="100"> -->
-        <!-- <v-card class="ma-0 pa-0"> -->
-        <!-- <div> -->
-      <!-- <Timeliner /> -->
-      <!-- </div> -->
-      <!-- </v-card> -->
-            <!-- </v-col> -->
-    </v-row>
-  </v-container
+    <v-col cols="7" class="pa-1" >
+      <div class="section-card ">
+      <RenderingSection @initTimeline="initTimeline"/>
+      </div>
+    </v-col>
+
+    <v-col cols="2.5" class="pa-1">
+      <div class="section-card ">
+      <Properties/>
+      </div>
+    </v-col>
+  </v-row>
+
+  <v-row>
+    <v-col cols="12" class="pa-1">
+    <div class="section-card pa-2">
+      <TimelineSection ref="TimelineSection"/>
+    </div>
+    </v-col>
+  </v-row>
+</v-layout>
+
+</v-container>
 </template>
+
+<style>
+.main-container {
+  background: #1b1b1b;
+}
+.section-card {
+  border-radius: 8px 8px;
+  overflow: hidden;
+  background: #1f1f1f;
+  height: 100%;
+}
+</style>
 
 <script>
 // @ is an alias to /src
 import RenderingSection from '@/components/Rendering/RenderingSection.vue'
-
 import Samples from '@/components/Samples.vue'
 import Properties from '@/components/Properties.vue'
-// import Directory from '@/components/Directory.vue'
-// import Timeliner from '@/components/Rendering/Timeliner.vue'
-=======
 import TimelineSection from '@/components/Rendering/Timeliner.vue'
->>>>>>> develop
 
 export default {
   name: 'Home',
   components: {
-<<<<<<< feature
-    RenderingSection, Samples, Properties
-    // , Directory
-=======
     RenderingSection,
+    // eslint-disable-next-line vue/no-unused-components
+    Samples,
+    Properties,
     // eslint-disable-next-line vue/no-unused-components
     TimelineSection
 
@@ -70,7 +80,6 @@ export default {
     initTimeline (scene, objects, render) {
       this.$refs.TimelineSection.init(scene, objects, render)
     }
->>>>>>> develop
   }
 }
 </script>

@@ -1,6 +1,6 @@
 const Theme = {
   // photoshop dark colors
-  a: '#1b1b1b', // base
+  a: '#1f1f1f', // base
   b: '#222222', // light
   c: '#b4b4b4', // text
   d: '#3d3d3e' // background

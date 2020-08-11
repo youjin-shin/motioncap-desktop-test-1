@@ -75,6 +75,12 @@ TimelinerController.prototype = {
   getContainer: function () {
     return this._container
   },
+  getContainerWidth: function () {
+    return this._container.clientWidth
+  },
+  getContainerHeight: function () {
+    return this._container.clientHeight
+  },
   getTracks: function () {
     return this._tracks
   },

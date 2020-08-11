@@ -18,3 +18,8 @@ export default new Vuetify({
     }
   }
 })
+
+// a: '#f5f5f5', // base
+// b: '#e6e6e6', // dark
+// c: '#2a2a2a', // text
+// d: '#bbbbbb' // background

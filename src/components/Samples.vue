@@ -1,6 +1,6 @@
 <template>
 
- <v-container fluid>
+ <v-container fill-height>
 <!-- <v-tabs> -->
   <!-- <v-tab>Library</v-tab> -->
   <!-- <v-tab>Samples</v-tab> -->

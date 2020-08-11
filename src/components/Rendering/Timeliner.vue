@@ -1,13 +1,11 @@
 <template>
-  <div>
-    <div ref="container" id="container">asdfasdf</div>
-  </div>
+  <div ref="container" id="container" style="height: 100%;"></div>
 </template>
 
 <script>
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-redeclare */
-import * as THREE from 'three'
+import * as THREE from '@/plugins/rendering/build/three.module'
 import { Timeliner } from '@/plugins/rendering/js/libs/TimelinerGUI/timeliner.js'
 import { TimelinerController } from '@/plugins/rendering/jsm/controls/TimelinerController.js'
 export default {

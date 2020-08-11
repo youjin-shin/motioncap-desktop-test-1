@@ -1,14 +1,19 @@
 
 <template>
-  <div>
-    <div ref="container" id="container"></div>
-  </div>
+    <div ref="container" id="rendering-container"/>
 </template>
+<style>
+.rendering-container {
+  height: 100%;
+}
+</style>
 
 <script>
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-redeclare */
-import * as THREE from 'three'
+// import * as THREE from 'three'
+
+import * as THREE from '@/plugins/rendering/build/three.module'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 // import { FBXLoader } from './jsm/loaders/FBXLoader.js'
 
@@ -53,6 +58,7 @@ export default {
       weights: [],
       trackInfo: [],
       container: undefined,
+      sectionContainer: undefined,
       objects: []
     }
   },
@@ -62,6 +68,7 @@ export default {
   methods: {
     init () {
       this.container = this.$refs.container
+      this.sectionContainer = this.$refs.sectionContainer
 
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
       camera.position.set(3, 3, -5)
@@ -69,13 +76,13 @@ export default {
       // scene.add(clock)
 
       scene = new THREE.Scene()
-      scene.background = new THREE.Color(0x1b1b1b)
+      scene.background = new THREE.Color(0x1f1f1f)
       scene.fog = new THREE.Fog(0x303030, 10, 50)
 
       grid = new THREE.GridHelper(16, 16, 0xff0000, 0x222222)
       scene.add(grid)
 
-      var hemiLight = new THREE.HemisphereLight(0xffffff, 0x1b1b1b)
+      var hemiLight = new THREE.HemisphereLight(0xffffff, 0x1f1f1f)
       hemiLight.position.set(0, 20, 0)
       scene.add(hemiLight)
 
@@ -100,13 +107,15 @@ export default {
 
       renderer = new THREE.WebGLRenderer({ antialias: true })
       renderer.setPixelRatio(window.devicePixelRatio)
+      // console.log(this.sectionContainer.clientWidth)
       renderer.setSize(window.innerWidth, window.innerHeight)
+      // renderer.setSize(this.sectionContainer.clientWidth, this.sectionContainer.clientHeight)
       renderer.outputEncoding = THREE.sRGBEncoding
 
       this.container.appendChild(renderer.domElement)
 
       stats = new Stats()
-      this.container.appendChild(stats.dom)
+      // this.container.appendChild(stats.dom)
 
       // Camera Orbit Controller
       cameraControls = new OrbitControls(camera, renderer.domElement)

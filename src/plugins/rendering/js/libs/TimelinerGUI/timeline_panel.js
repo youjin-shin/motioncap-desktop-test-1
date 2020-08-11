@@ -65,9 +65,10 @@ function TimelinePanel (context) {
 
   this.resize = function () {
     dpr = window.devicePixelRatio
-    canvas.width = context.width * dpr
+    console.log(context.controller.getContainer().clientHeight)
+    canvas.width = context.controller.getContainerWidth() * dpr - LayoutConstants.LEFT_PANE_WIDTH
     canvas.height = context.height * dpr
-    canvas.style.width = context.width + 'px'
+    canvas.style.width = context.controller.getContainerWidth() - LayoutConstants.LEFT_PANE_WIDTH + 'px'
     canvas.style.height = context.height + 'px'
     context.scrollHeight = context.height - MARKER_TRACK_HEIGHT
   }
