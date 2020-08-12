@@ -65,9 +65,8 @@ function TimelinePanel (context) {
 
   this.resize = function () {
     dpr = window.devicePixelRatio
-    console.log(context.controller.getContainer().clientHeight)
     canvas.width = context.controller.getContainerWidth() * dpr - LayoutConstants.LEFT_PANE_WIDTH
-    canvas.height = context.height * dpr
+    canvas.height = (context.height) * dpr
     canvas.style.width = context.controller.getContainerWidth() - LayoutConstants.LEFT_PANE_WIDTH + 'px'
     canvas.style.height = context.height + 'px'
     context.scrollHeight = context.height - MARKER_TRACK_HEIGHT
@@ -162,7 +161,7 @@ function TimelinePanel (context) {
 
       ctx_wrap
         .moveTo(0, y)
-        .lineTo(context.width, y)
+        .lineTo(context.controller.getContainerWidth(), y)
         .stroke()
     }
 
@@ -201,7 +200,7 @@ function TimelinePanel (context) {
   var left
 
   function drawScroller () {
-    var w = context.width
+    var w = context.controller.getContainerWidth()
 
     var totalTime = context.totalTime
     var viewTime = w / time_scale
@@ -219,6 +218,8 @@ function TimelinePanel (context) {
 
     scroller.left = context.scrollTime * k
     scroller.left = Math.min(Math.max(0, scroller.left), w - scroller.grip_length)
+
+    // console.log(scroller.left)
 
     ctx.beginPath()
     ctx.fillStyle = Theme.b // 'cyan';
@@ -301,7 +302,7 @@ function TimelinePanel (context) {
       .scale(dpr, dpr)
       .translate(0, MARKER_TRACK_HEIGHT)
       .beginPath()
-      .rect(0, 0, context.width, context.scrollHeight)
+      .rect(0, 0, context.controller.getContainerWidth(), context.scrollHeight)
       .translate(-scrollLeft, -scrollTop)
       .clip()
       .run(check)
@@ -331,13 +332,13 @@ function TimelinePanel (context) {
 
     ctx.lineWidth = 1 // .5, 1, 2
 
-    var width = context.width
+    var width = context.controller.getContainerWidth()
     var height = context.height
 
     var units = time_scale / tickMark1
     var offsetUnits = (frame_start * time_scale) % units
 
-    var count = (context.width - LEFT_GUTTER + offsetUnits) / units
+    var count = (context.controller.getContainerWidth() - LEFT_GUTTER + offsetUnits) / units
 
     // console.log('time_scale', time_scale, 'tickMark1', tickMark1, 'units', units, 'offsetUnits', offsetUnits, frame_start);
 
@@ -365,7 +366,7 @@ function TimelinePanel (context) {
     }
 
     units = time_scale / tickMark2
-    count = (context.width - LEFT_GUTTER + offsetUnits) / units
+    count = (context.controller.getContainerWidth() - LEFT_GUTTER + offsetUnits) / units
 
     // marker lines - main
     for (i = 0; i < count; i++) {
@@ -379,7 +380,7 @@ function TimelinePanel (context) {
 
     var mul = tickMark3 / tickMark2
     units = time_scale / tickMark3
-    count = (context.width - LEFT_GUTTER + offsetUnits) / units
+    count = (context.controller.getContainerWidth() - LEFT_GUTTER + offsetUnits) / units
 
     // small ticks
     for (i = 0; i < count; i++) {
@@ -397,7 +398,7 @@ function TimelinePanel (context) {
       .save()
       .translate(0, MARKER_TRACK_HEIGHT)
       .beginPath()
-      .rect(0, 0, context.width, context.scrollHeight)
+      .rect(0, 0, context.controller.getContainerWidth(), context.scrollHeight)
       .translate(-scrollLeft, -scrollTop)
       .clip()
       .run(drawLayerContents)

@@ -47,8 +47,9 @@ function Timeliner (controller) {
 
   var context = {
 
-    width: LayoutConstants.WIDTH,
+    width: controller.getContainerWidth(),
     height: LayoutConstants.HEIGHT,
+    // height: controller.getContainerHeight(),
 
     scrollHeight: 0,
 
@@ -208,8 +209,8 @@ function Timeliner (controller) {
 
     if (needsResize) {
       div.style.width = 100 + '%'
-      console.log(container.clientHeight)
-      div.style.height = container.clientHeight + 'px'
+      // console.log(container.clientHeight)
+      div.style.height = 100 + '%'
 
       restyle(layer_panel.dom, timeline.dom)
 
@@ -563,16 +564,16 @@ function Timeliner (controller) {
         layer_panel.scrollTo(scrollTo)
         timeline.scrollTo(scrollTo)
         break
-      case 'pageup':
-        scrollTop -= pageOffset
-        me.draw()
-        me.updateScrollbar()
-        break
-      case 'pagedown':
-        scrollTop += pageOffset
-        me.draw()
-        me.updateScrollbar()
-        break
+      // case 'pageup':
+      //   scrollTop -= pageOffset
+      //   me.draw()
+      //   me.updateScrollbar()
+      //   break
+      // case 'pagedown':
+      //   scrollTop += pageOffset
+      //   me.draw()
+      //   me.updateScrollbar()
+      //   break
     }
   })
 
@@ -621,7 +622,7 @@ function Timeliner (controller) {
     context.width = newWidth - LayoutConstants.LEFT_PANE_WIDTH - 4
     context.height = newHeight
     context.scrollHeight = context.height - LayoutConstants.MARKER_TRACK_HEIGHT
-    scrollbar.setHeight(context.scrollHeight - 2)
+    scrollbar.setHeight(context.scrollHeight - 24)
 
     style(scrollbar.dom, {
       top: LayoutConstants.MARKER_TRACK_HEIGHT + 'px',
@@ -676,7 +677,7 @@ function Timeliner (controller) {
     var SNAP_MARGINS = 12
     var MARGINS = 2
 
-    var DEFAULT_SNAP = ''
+    var DEFAULT_SNAP = 'full-screen'
 
     // End of what's configurable.
 
@@ -984,9 +985,10 @@ function Timeliner (controller) {
           // console.log(container.parentElement.parentElement.parentElement.clientHeight)
           x = 0
           y = 0
-          w = window.innerWidth
+          w = controller.getContainerWidth()
           // h = window.innerHeight
-          h = container.parentElement.parentElement.clientHeight
+          h = controller.getContainerHeight()
+          // h = container.parentElement.parentElement.clientHeight
           break
         case 'snap-top-edge':
           x = 0

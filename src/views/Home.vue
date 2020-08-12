@@ -5,34 +5,32 @@
   fill-height
 >
 <v-layout row wrap>
-
-  <v-row >
+  <v-row>
     <v-col cols="2.5" class="pa-1">
       <div class="section-card ">
       <!-- <Samples /> -->
       </div>
     </v-col>
-
-    <v-col cols="7" class="pa-1" >
-      <div class="section-card ">
-      <RenderingSection @initTimeline="initTimeline"/>
+<!-- style="align-self: baseline" -->
+    <v-col style="height: fit-content;" cols="7" class="pa-1" >
+      <div class="section-card">
+        <RenderingSection @initTimeline="initTimeline"/>
       </div>
     </v-col>
-
     <v-col cols="2.5" class="pa-1">
       <div class="section-card ">
-      <Properties/>
+      <!-- <Properties/> -->
       </div>
     </v-col>
-  </v-row>
-
-  <v-row>
     <v-col cols="12" class="pa-1">
     <div class="section-card pa-2">
       <TimelineSection ref="TimelineSection"/>
     </div>
     </v-col>
   </v-row>
+
+  <!-- <v-row>
+  </v-row> -->
 </v-layout>
 
 </v-container>
@@ -40,12 +38,12 @@
 
 <style>
 .main-container {
-  background: #1b1b1b;
+  background: #e6e6e6;
 }
 .section-card {
-  border-radius: 8px 8px;
+  border-radius: 5px 5px;
   overflow: hidden;
-  background: #1f1f1f;
+  background: #f5f5f5;
   height: 100%;
 }
 </style>
@@ -60,9 +58,11 @@ import TimelineSection from '@/components/Rendering/Timeliner.vue'
 export default {
   name: 'Home',
   components: {
+    // eslint-disable-next-line vue/no-unused-components
     RenderingSection,
     // eslint-disable-next-line vue/no-unused-components
     Samples,
+    // eslint-disable-next-line vue/no-unused-components
     Properties,
     // eslint-disable-next-line vue/no-unused-components
     TimelineSection

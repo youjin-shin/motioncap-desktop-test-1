@@ -3,9 +3,6 @@
     <div ref="container" id="rendering-container"/>
 </template>
 <style>
-.rendering-container {
-  height: 100%;
-}
 </style>
 
 <script>
@@ -48,8 +45,8 @@ export default {
     return {
 
       isGUIOn: false,
-      path: '/models/gltf/exo2.glb',
-      // path: '/models/gltf/Soldier.glb',
+      // path: '/models/gltf/exo2.glb',
+      path: '/models/gltf/Soldier.glb',
 
       // path: '/models/fbx/Zepeto.fbx',
       actions: [],
@@ -68,46 +65,47 @@ export default {
   methods: {
     init () {
       this.container = this.$refs.container
-      this.sectionContainer = this.$refs.sectionContainer
+      this.sectionContainer = this.$refs.container.parentElement
+      // console.log(this.sectionContainer.cle)
 
-      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / (window.innerHeight), 1, 1000)
       camera.position.set(3, 3, -5)
       clock = new THREE.Clock()
       // scene.add(clock)
 
       scene = new THREE.Scene()
-      scene.background = new THREE.Color(0x1f1f1f)
+      scene.background = new THREE.Color(0xe6e6e6)
       scene.fog = new THREE.Fog(0x303030, 10, 50)
 
       grid = new THREE.GridHelper(16, 16, 0xff0000, 0x222222)
       scene.add(grid)
 
-      var hemiLight = new THREE.HemisphereLight(0xffffff, 0x1f1f1f)
+      var hemiLight = new THREE.HemisphereLight(0xffffff, 0xe6e6e6)
       hemiLight.position.set(0, 20, 0)
       scene.add(hemiLight)
 
-      // var dirLight = new THREE.DirectionalLight(0xffffff)
-      // dirLight.position.set(-3, 10, -10)
-      // dirLight.castShadow = true
-      // dirLight.shadow.camera.top = 2
-      // dirLight.shadow.camera.bottom = -2
-      // dirLight.shadow.camera.left = -2
-      // dirLight.shadow.camera.right = 2
-      // dirLight.shadow.camera.near = 0.1
-      // dirLight.shadow.camera.far = 40
-      // scene.add(dirLight)
+      var dirLight = new THREE.DirectionalLight(0xffffff)
+      dirLight.position.set(-3, 10, -10)
+      dirLight.castShadow = true
+      dirLight.shadow.camera.top = 2
+      dirLight.shadow.camera.bottom = -2
+      dirLight.shadow.camera.left = -2
+      dirLight.shadow.camera.right = 2
+      dirLight.shadow.camera.near = 0.1
+      dirLight.shadow.camera.far = 40
+      scene.add(dirLight)
 
       // scene.add(new CameraHelper(light.shadow.camera))
 
       // ground
-      // var mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(100, 100), new THREE.MeshPhongMaterial({ color: 0x101010, depthWrite: false }))
+      // var mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(100, 100), new THREE.MeshPhongMaterial({ color: 0xf5f5f5, depthWrite: false }))
       // mesh.rotation.x = -Math.PI / 2
       // mesh.receiveShadow = true
-      // // scene.add(mesh)
+      // scene.add(mesh)
 
       renderer = new THREE.WebGLRenderer({ antialias: true })
       renderer.setPixelRatio(window.devicePixelRatio)
-      // console.log(this.sectionContainer.clientWidth)
+      console.log(this.sectionContainer.clientHeight)
       renderer.setSize(window.innerWidth, window.innerHeight)
       // renderer.setSize(this.sectionContainer.clientWidth, this.sectionContainer.clientHeight)
       renderer.outputEncoding = THREE.sRGBEncoding
