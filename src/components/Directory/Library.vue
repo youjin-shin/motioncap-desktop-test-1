@@ -7,7 +7,7 @@
     <v-list-item>
       <v-list-item-content>
         <v-list-item-title class="title">
-          LIBRARY <v-btn icon
+            <v-btn icon
           class="ml-10"><v-icon>mdi-plus</v-icon></v-btn>
         </v-list-item-title>
       </v-list-item-content>

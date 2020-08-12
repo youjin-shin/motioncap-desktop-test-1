@@ -1,23 +1,19 @@
 /* eslint-disable vue/no-unused-components */
 <template>
-  <v-container>
+  <v-container class="pa-0">
     <!--  class="ma-0 pa-0" -->
     <v-row fill-height="100%">
       <v-col cols="2.5" class="ma-0 pa-0" fill-height="100%">
-          <div>
-            <Samples fill-height="100%" />
-          </div>
-
+            <Directory fill-height="100%" />
+            <Samples />
       </v-col >
+
       <v-col fill-height="100%" cols="7"  class="ma-0 pa-0" height="100%">
-          <div>
           <RenderingSection fill-height="100%" />
-          </div>
       </v-col>
+
       <v-col cols="2.5" class="ma-0 pa-0" fill-height="100%">
-          <div>
-          <Properties fill-height="100%" />
-          </div>
+          <Menu />
       </v-col>
     </v-row>
     <v-row>
@@ -36,15 +32,16 @@
 <script>
 // @ is an alias to /src
 import RenderingSection from '@/components/Rendering/RenderingSection.vue'
-import Samples from '@/components/Samples.vue'
-import Properties from '@/components/Properties.vue'
+import Samples from '@/components/Directory/Samples.vue'
+import Menu from '@/components/Function/Menu.vue'
+import Directory from '@/components/Directory/Directory.vue'
 // import Directory from '@/components/Directory.vue'
 // import Timeliner from '@/components/Rendering/Timeliner.vue'
 
 export default {
   name: 'Home',
   components: {
-    RenderingSection, Samples, Properties
+    RenderingSection, Samples, Menu, Directory
     // , Directory
   }
 }
