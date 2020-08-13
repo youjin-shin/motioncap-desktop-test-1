@@ -47,8 +47,10 @@ function Timeliner (controller) {
 
   var context = {
 
-    width: LayoutConstants.WIDTH,
+    width: controller.getContainerWidth(),
     height: LayoutConstants.HEIGHT,
+    // height: controller.getContainerHeight(),
+
     scrollHeight: 0,
 
     totalTime: 20.0,
@@ -62,15 +64,16 @@ function Timeliner (controller) {
     controller: controller
 
   }
+
   var timeline = new TimelinePanel(context)
   var layer_panel = new LayerCabinet(context)
-  // console.log(layer_panel)
 
   var undo_manager = new UndoManager(dispatcher)
 
   var scrollbar = new ScrollBar(0, 10)
 
   var div = document.createElement('div')
+  var container = controller.getContainer()
 
   controller.setDuration(context.totalTime)
 
@@ -205,8 +208,9 @@ function Timeliner (controller) {
     }
 
     if (needsResize) {
-      div.style.width = context.width + 'px'
-      div.style.height = context.height + 'px'
+      div.style.width = 100 + '%'
+      // console.log(container.clientHeight)
+      div.style.height = 100 + '%'
 
       restyle(layer_panel.dom, timeline.dom)
 
@@ -353,14 +357,14 @@ function Timeliner (controller) {
   style(div, {
     textAlign: 'left',
     lineHeight: '1em',
-    position: 'absolute',
-    top: '24px'
+    position: 'relative'
+    // top: '24px'
   })
 
   var pane = document.createElement('div')
 
   style(pane, {
-    position: 'fixed',
+    position: 'static',
     top: '24px',
     left: '24px',
     margin: 0,
@@ -375,10 +379,10 @@ function Timeliner (controller) {
   })
 
   var header_styles = {
-    position: 'absolute',
-    top: '0px',
+    position: 'relative',
+    top: '0',
     width: '100%',
-    height: '22px',
+    height: '24px',
     lineHeight: '22px',
     overflow: 'hidden'
   }
@@ -399,10 +403,9 @@ function Timeliner (controller) {
   var title_bar = document.createElement('span')
   pane_title.appendChild(title_bar)
 
-  pane_title.appendChild(title_bar)
-
   var top_right_bar = document.createElement('div')
   style(top_right_bar, header_styles, {
+
     textAlign: 'right'
   })
 
@@ -421,7 +424,7 @@ function Timeliner (controller) {
   var pane_status = document.createElement('div')
 
   var footer_styles = {
-    position: 'absolute',
+    position: 'relative',
     width: '100%',
     height: '22px',
     lineHeight: '22px',
@@ -435,9 +438,9 @@ function Timeliner (controller) {
     background: Theme.a
   })
 
+  pane.appendChild(pane_title)
   pane.appendChild(div)
   pane.appendChild(pane_status)
-  pane.appendChild(pane_title)
 
   var label_status = document.createElement('span')
   label_status.textContent = ''
@@ -454,29 +457,30 @@ function Timeliner (controller) {
 
   var bottom_right = document.createElement('div')
   style(bottom_right, footer_styles, {
+    bottom: '22px',
     textAlign: 'right'
   })
 
-  // var button_save = document.createElement('button');
-  // style(button_save, button_styles);
-  // button_save.textContent = 'Save';
-  // button_save.onclick = function() {
-  // 	save();
-  // };
+  // var button_save = document.createElement('button')
+  // style(button_save, button_styles)
+  // button_save.textContent = 'Save'
+  // button_save.onclick = function () {
+  //   save()
+  // }
 
-  // var button_load = document.createElement('button');
-  // style(button_load, button_styles);
-  // button_load.textContent = 'Import';
-  // button_load.onclick = this.promptLoad;
+  // var button_load = document.createElement('button')
+  // style(button_load, button_styles)
+  // button_load.textContent = 'Import'
+  // button_load.onclick = this.promptLoad
 
-  // var button_open = document.createElement('button');
-  // style(button_open, button_styles);
-  // button_open.textContent = 'Open';
-  // button_open.onclick = this.promptOpen;
+  // var button_open = document.createElement('button')
+  // style(button_open, button_styles)
+  // button_open.textContent = 'Open'
+  // button_open.onclick = this.promptOpen
 
-  // bottom_right.appendChild(button_load);
-  // bottom_right.appendChild(button_save);
-  // bottom_right.appendChild(button_open);
+  // bottom_right.appendChild(button_load)
+  // bottom_right.appendChild(button_save)
+  // bottom_right.appendChild(button_open)
 
   pane_status.appendChild(label_status)
   pane_status.appendChild(bottom_right)
@@ -488,39 +492,39 @@ function Timeliner (controller) {
   // settings
   var cog = new IconButton(12, 'cog', 'settings', dispatcher)
 
-  // bottom_right.appendChild(zoom_in.dom);
-  // bottom_right.appendChild(zoom_out.dom);
-  // bottom_right.appendChild(cog.dom);
+  bottom_right.appendChild(zoom_in.dom)
+  bottom_right.appendChild(zoom_out.dom)
+  bottom_right.appendChild(cog.dom)
 
-  // add layer
-  var plus = new IconButton(12, 'plus', 'New Layer', dispatcher)
-  plus.onClick(function () {
-    // var name = prompt('Layer name?')
-    var name = 'test'
-    addLayer(name)
+  // // add layer
+  // var plus = new IconButton(12, 'plus', 'New Layer', dispatcher)
+  // plus.onClick(function () {
+  //   // var name = prompt('Layer name?')
+  //   var name = 'test'
+  //   addLayer(name)
 
-    // undo_manager.save(new UndoState(data, 'Layer added'));
+  //   // undo_manager.save(new UndoState(data, 'Layer added'));
 
-    repaintAll()
-  })
-  style(plus.dom, button_styles)
-  bottom_right.appendChild(plus.dom)
+  //   repaintAll()
+  // })
+  // style(plus.dom, button_styles)
+  // bottom_right.appendChild(plus.dom)
 
-  // trash
-  var trash = new IconButton(12, 'trash', 'Delete save', dispatcher)
-  trash.onClick(function () {
-    var name = data.get('name').value
-    if (name && localStorage[STORAGE_PREFIX + name]) {
-      var ok = confirm('Are you sure you wish to delete ' + name + '?')
-      if (ok) {
-        delete localStorage[STORAGE_PREFIX + name]
-        dispatcher.fire('status', name + ' deleted')
-        dispatcher.fire('save:done')
-      }
-    }
-  })
-  style(trash.dom, button_styles, { marginRight: '2px' })
-  bottom_right.appendChild(trash.dom)
+  // // trash
+  // var trash = new IconButton(12, 'trash', 'Delete save', dispatcher)
+  // trash.onClick(function () {
+  //   var name = data.get('name').value
+  //   if (name && localStorage[STORAGE_PREFIX + name]) {
+  //     var ok = confirm('Are you sure you wish to delete ' + name + '?')
+  //     if (ok) {
+  //       delete localStorage[STORAGE_PREFIX + name]
+  //       dispatcher.fire('status', name + ' deleted')
+  //       dispatcher.fire('save:done')
+  //     }
+  //   }
+  // })
+  // style(trash.dom, button_styles, { marginRight: '2px' })
+  // bottom_right.appendChild(trash.dom)
 
   // pane_status.appendChild(document.createTextNode(' | TODO <Dock Full | Dock Botton | Snap Window Edges | zoom in | zoom out | Settings | help>'));
 
@@ -543,8 +547,10 @@ function Timeliner (controller) {
     transitionTimingFunction: 'ease-in-out'
   })
 
-  document.body.appendChild(pane)
-  document.body.appendChild(ghostpane)
+  container.appendChild(pane)
+  // document.body.appendChild(pane)
+  // document.body.appendChild(ghostpane)
+  // container.appendChild(ghostpane)
 
   div.appendChild(layer_panel.dom)
   div.appendChild(timeline.dom)
@@ -558,16 +564,16 @@ function Timeliner (controller) {
         layer_panel.scrollTo(scrollTo)
         timeline.scrollTo(scrollTo)
         break
-	//		case 'pageup':
-	// 			scrollTop -= pageOffset;
-	// 			me.draw();
-	// 			me.updateScrollbar();
-	// 			break;
-	// 		case 'pagedown':
-	// 			scrollTop += pageOffset;
-	// 			me.draw();
-	// 			me.updateScrollbar();
-	// 			break;
+      // case 'pageup':
+      //   scrollTop -= pageOffset
+      //   me.draw()
+      //   me.updateScrollbar()
+      //   break
+      // case 'pagedown':
+      //   scrollTop += pageOffset
+      //   me.draw()
+      //   me.updateScrollbar()
+      //   break
     }
   })
 
@@ -592,7 +598,7 @@ function Timeliner (controller) {
     var undo = e.metaKey && e.keyCode === 91 && !e.shiftKey
 
     var active = document.activeElement
-    // console.log( active.nodeName );
+    // console.log(active.nodeName)
 
     if (active.nodeName.match(/(INPUT|BUTTON|SELECT)/)) {
       active.blur()
@@ -614,9 +620,9 @@ function Timeliner (controller) {
   function resize (newWidth, newHeight) {
     // TODO: remove ugly hardcodes
     context.width = newWidth - LayoutConstants.LEFT_PANE_WIDTH - 4
-    context.height = newHeight - 44
+    context.height = newHeight
     context.scrollHeight = context.height - LayoutConstants.MARKER_TRACK_HEIGHT
-    scrollbar.setHeight(context.scrollHeight - 2)
+    scrollbar.setHeight(context.scrollHeight - 24)
 
     style(scrollbar.dom, {
       top: LayoutConstants.MARKER_TRACK_HEIGHT + 'px',
@@ -637,6 +643,7 @@ function Timeliner (controller) {
     // right.style.cssText = 'position: absolute; top: 0px;';
     right.style.position = 'absolute'
     right.style.top = '0px'
+    // right.style.width = LayoutConstants.width + 'px'
     right.style.left = LayoutConstants.LEFT_PANE_WIDTH + 'px'
   }
 
@@ -670,7 +677,7 @@ function Timeliner (controller) {
     var SNAP_MARGINS = 12
     var MARGINS = 2
 
-    var DEFAULT_SNAP = 'snap-bottom-edge'
+    var DEFAULT_SNAP = 'full-screen'
 
     // End of what's configurable.
 
@@ -700,18 +707,18 @@ function Timeliner (controller) {
       mouseOnTitle = false
     })
 
-    resize_full.onClick(function () {
-      // TOOD toggle back to restored size
-      if (!preSnapped) {
-        preSnapped = {
-          width: b.width,
-          height: b.height
-        }
-      }
+    // resize_full.onClick(function () {
+    //   // TOOD toggle back to restored size
+    //   if (!preSnapped) {
+    //     preSnapped = {
+    //       width: b.width,
+    //       height: b.height
+    //     }
+    //   }
 
-      snapType = 'full-screen'
-      resizeEdges()
-    })
+    //   snapType = 'full-screen'
+    //   resizeEdges()
+    // })
 
     // pane_status.addEventListener('mouseover', function() {
     // 	mouseOnTitle = true;
@@ -729,8 +736,8 @@ function Timeliner (controller) {
     function setBounds (element, x, y, w, h) {
       element.style.left = x + 'px'
       element.style.top = y + 'px'
-      element.style.width = w + 'px'
-      element.style.height = h + 'px'
+      element.style.width = 100 + '%'
+      element.style.height = 100 + '%'
 
       if (element === pane) {
         resize(w, h)
@@ -746,9 +753,9 @@ function Timeliner (controller) {
     setBounds(ghostpane, 0, 0, context.width, context.height)
 
     // Mouse events
-    pane.addEventListener('mousedown', onMouseDown)
-    pane.addEventListener('mouseover', onMouseOver)
-    pane.addEventListener('mouseout', onMouseOut)
+    // pane.addEventListener('mousedown', onMouseDown)
+    // pane.addEventListener('mouseover', onMouseOver)
+    // pane.addEventListener('mouseout', onMouseOut)
     document.addEventListener('mousemove', onMove)
     document.addEventListener('mouseup', onUp)
 
@@ -872,7 +879,7 @@ function Timeliner (controller) {
       if (clicked && clicked.isMoving) {
         switch (checks()) {
           case 'full-screen':
-            setBounds(ghostpane, 0, 0, window.innerWidth, window.innerHeight)
+            setBounds(ghostpane, 0, 0, window.innerWidth, context.height)
             ghostpane.style.opacity = 0.2
             break
           case 'snap-top-edge':
@@ -975,16 +982,19 @@ function Timeliner (controller) {
       var x, y, w, h
       switch (snapType) {
         case 'full-screen':
+          // console.log(container.parentElement.parentElement.parentElement.clientHeight)
           x = 0
           y = 0
-          w = window.innerWidth
-          h = window.innerHeight
+          w = controller.getContainerWidth()
+          // h = window.innerHeight
+          h = controller.getContainerHeight()
+          // h = container.parentElement.parentElement.clientHeight
           break
         case 'snap-top-edge':
           x = 0
           y = 0
           w = window.innerWidth
-          h = window.innerHeight * 0.25
+          h = window.innerHeight * 0.3
           break
         case 'snap-left-edge':
           x = 0
@@ -1002,7 +1012,7 @@ function Timeliner (controller) {
           x = 0
           y = window.innerHeight * 0.75
           w = window.innerWidth
-          h = window.innerHeight * 0.25
+          h = window.innerHeight * 0.5
           break
         default:
           return

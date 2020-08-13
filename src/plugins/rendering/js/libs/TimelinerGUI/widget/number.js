@@ -25,14 +25,14 @@ function NumberUI (config) {
 
   style(span, {
     textAlign: 'center',
-    fontSize: '10px',
+    fontSize: '12px',
     padding: '1px',
     cursor: 'ns-resize',
     width: '40px',
     margin: 0,
     marginRight: '10px',
     appearance: 'none',
-    outline: 'none',
+    overflow: 'hidden',
     border: 0,
     background: 'none',
     borderBottom: '1px dotted ' + Theme.c,

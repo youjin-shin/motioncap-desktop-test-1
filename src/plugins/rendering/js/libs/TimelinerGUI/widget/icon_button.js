@@ -111,7 +111,7 @@ function IconButton (size, icon, tooltip, dp) {
   }
 
   var borders = {
-    border: '1px solid ' + Theme.b
+    // border: '1px solid ' + Theme.b
     // boxShadow: Theme.b + ' 1px 1px'
   }
 

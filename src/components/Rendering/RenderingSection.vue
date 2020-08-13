@@ -1,14 +1,16 @@
 
 <template>
-  <div>
-    <div ref="container" id="container"></div>
-  </div>
+    <div ref="container" id="rendering-container"/>
 </template>
+<style>
+</style>
 
 <script>
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-redeclare */
-import * as THREE from 'three'
+// import * as THREE from 'three'
+
+import * as THREE from '@/plugins/rendering/build/three.module'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 // import { FBXLoader } from './jsm/loaders/FBXLoader.js'
 
@@ -19,8 +21,8 @@ import { OrbitControls } from '@/plugins/rendering/jsm/controls/cameraOrbitContr
 // import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 import { TransformControls } from '@/plugins/rendering/jsm/controls/transformControls.js'
 
-import { Timeliner } from '@/plugins/rendering/js/libs/TimelinerGUI/timeliner.js'
-import { TimelinerController } from '@/plugins/rendering/jsm/controls/TimelinerController.js'
+// import { Timeliner } from '@/plugins/rendering/js/libs/TimelinerGUI/timeliner.js'
+// import { TimelinerController } from '@/plugins/rendering/jsm/controls/TimelinerController.js'
 
 import { DragControls } from '@/plugins/rendering/jsm/controls/DragControls.js'
 
@@ -37,18 +39,23 @@ var actionWeights = []
 var singleStepMode = false
 var sizeOfNextStep = 0
 export default {
+  components: {
+  },
   data () {
     return {
 
       isGUIOn: false,
-      path: '/models/gltf/exo2.glb',
+      // path: '/models/gltf/exo2.glb',
+      path: '/models/gltf/Soldier.glb',
 
       // path: '/models/fbx/Zepeto.fbx',
       actions: [],
+      bonePivotSize: 0.2,
       settings: [],
       weights: [],
       trackInfo: [],
       container: undefined,
+      sectionContainer: undefined,
       objects: []
     }
   },
@@ -57,53 +64,56 @@ export default {
   },
   methods: {
     init () {
-      // container = document.getElementById('container')
       this.container = this.$refs.container
+      this.sectionContainer = this.$refs.container.parentElement
+      // console.log(this.sectionContainer.cle)
 
-      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / (window.innerHeight), 1, 1000)
       camera.position.set(3, 3, -5)
       clock = new THREE.Clock()
       // scene.add(clock)
 
       scene = new THREE.Scene()
-      scene.background = new THREE.Color(0x1b1b1b)
+      scene.background = new THREE.Color(0xe6e6e6)
       scene.fog = new THREE.Fog(0x303030, 10, 50)
 
       grid = new THREE.GridHelper(16, 16, 0xff0000, 0x222222)
       scene.add(grid)
 
-      var hemiLight = new THREE.HemisphereLight(0xffffff, 0x1b1b1b)
+      var hemiLight = new THREE.HemisphereLight(0xffffff, 0xe6e6e6)
       hemiLight.position.set(0, 20, 0)
       scene.add(hemiLight)
 
-      // var dirLight = new THREE.DirectionalLight(0xffffff)
-      // dirLight.position.set(-3, 10, -10)
-      // dirLight.castShadow = true
-      // dirLight.shadow.camera.top = 2
-      // dirLight.shadow.camera.bottom = -2
-      // dirLight.shadow.camera.left = -2
-      // dirLight.shadow.camera.right = 2
-      // dirLight.shadow.camera.near = 0.1
-      // dirLight.shadow.camera.far = 40
-      // scene.add(dirLight)
+      var dirLight = new THREE.DirectionalLight(0xffffff)
+      dirLight.position.set(-3, 10, -10)
+      dirLight.castShadow = true
+      dirLight.shadow.camera.top = 2
+      dirLight.shadow.camera.bottom = -2
+      dirLight.shadow.camera.left = -2
+      dirLight.shadow.camera.right = 2
+      dirLight.shadow.camera.near = 0.1
+      dirLight.shadow.camera.far = 40
+      scene.add(dirLight)
 
       // scene.add(new CameraHelper(light.shadow.camera))
 
       // ground
-      // var mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(100, 100), new THREE.MeshPhongMaterial({ color: 0x101010, depthWrite: false }))
+      // var mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(100, 100), new THREE.MeshPhongMaterial({ color: 0xf5f5f5, depthWrite: false }))
       // mesh.rotation.x = -Math.PI / 2
       // mesh.receiveShadow = true
-      // // scene.add(mesh)
+      // scene.add(mesh)
 
       renderer = new THREE.WebGLRenderer({ antialias: true })
       renderer.setPixelRatio(window.devicePixelRatio)
+      console.log(this.sectionContainer.clientHeight)
       renderer.setSize(window.innerWidth, window.innerHeight)
+      // renderer.setSize(this.sectionContainer.clientWidth, this.sectionContainer.clientHeight)
       renderer.outputEncoding = THREE.sRGBEncoding
 
       this.container.appendChild(renderer.domElement)
 
       stats = new Stats()
-      this.container.appendChild(stats.dom)
+      // this.container.appendChild(stats.dom)
 
       // Camera Orbit Controller
       cameraControls = new OrbitControls(camera, renderer.domElement)
@@ -133,6 +143,7 @@ export default {
 
           //
 
+          console.log(model)
           skeleton = new THREE.SkeletonHelper(model)
           skeleton.visible = true
 
@@ -140,8 +151,7 @@ export default {
             var materials = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.5, transparent: true })
             materials.depthWrite = false
             materials.depthTest = false
-            var mesh = new THREE.Mesh(new THREE.SphereGeometry(0.2), materials)
-
+            var mesh = new THREE.Mesh(new THREE.SphereGeometry(this.bonePivotSize), materials)
             this.objects.push(element)
             element.add(mesh)
           })
@@ -171,29 +181,33 @@ export default {
 
           scene.add(transformControls)
 
-          for (var i = 0; i < this.objects.length; i++) {
-            var vectorValue = Object.values(this.objects[i].position)
-            var quaternionValue = Object.values(this.objects[i].quaternion)
-            quaternionValue.pop()
-            this.trackInfo.push({
-              type: THREE.VectorKeyframeTrack,
-              propertyPath: this.objects[i].name + '.position',
-              initialValue: vectorValue,
-              interpolation: THREE.InterpolateSmooth
-            })
+          // for (var i = 0; i < this.objects.length; i++) {
+          //   var vectorValue = Object.values(this.objects[i].position)
+          //   var quaternionValue = Object.values(this.objects[i].quaternion)
+          //   quaternionValue.pop()
+          //   this.trackInfo.push({
+          //     type: THREE.VectorKeyframeTrack,
+          //     propertyPath: this.objects[i].name + '.position',
+          //     initialValue: vectorValue,
+          //     interpolation: THREE.InterpolateSmooth
+          //   })
 
-            this.trackInfo.push(
-              {
-                type: THREE.QuaternionKeyframeTrack,
-                propertyPath: this.objects[i].name + '.quaternion',
-                initialValue: quaternionValue,
-                interpolation: THREE.InterpolateLinear
+          //   this.trackInfo.push(
+          //     {
+          //       type: THREE.QuaternionKeyframeTrack,
+          //       propertyPath: this.objects[i].name + '.quaternion',
+          //       initialValue: quaternionValue,
+          //       interpolation: THREE.InterpolateLinear
 
-              })
-          }
+          //     })
+          // }
 
-          // eslint-disable-next-line no-new
-          new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
+          // console.log(this.trackInfo)
+
+          // // eslint-disable-next-line no-new
+          // new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
+
+          this.$emit('initTimeline', scene, this.objects, this.render)
         })
       }
       // Event Listners
@@ -305,7 +319,7 @@ export default {
       var folder3 = panel.addFolder('Pausing/Stepping')
       // var folder4 = panel.addFolder('Crossfading')
       var folder5 = panel.addFolder('Blend Weights')
-      var folder6 = panel.addFolder('General Speed')
+      var folder6 = panel.addFolder('General Values')
 
       this.settings = {
         'show model': true,
@@ -322,6 +336,7 @@ export default {
         // },
 
         'modify idle weight': 0.0,
+        'modify bonePivot scale': 1.0,
         'modify time scale': 1.0
       }
       folder1.add(this.settings, 'show model').onChange(this.showModel)
@@ -338,6 +353,7 @@ export default {
       })
 
       folder6.add(this.settings, 'modify time scale', 0.0, 1.5, 0.01).onChange(this.modifyTimeScale)
+      folder6.add(this.settings, 'modify bonePivot scale', 0.0, 2, 0.01).onChange(this.modifybonePivotScale)
       folder1.open()
       folder2.open()
       folder3.open()
@@ -371,6 +387,9 @@ export default {
 
     modifyTimeScale: function (speed) {
       mixer.timeScale = speed
+    },
+    modifybonePivotScale: function (scale) {
+      this.bonePivotSize = scale
     },
     deactivateAllActions: function () {
       this.actions.forEach(function (action) {

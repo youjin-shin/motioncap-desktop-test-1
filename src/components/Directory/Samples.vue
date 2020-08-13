@@ -1,6 +1,33 @@
 <template>
-<v-container>
- <v-text-field
+
+ <v-container fill-height>
+<!-- <v-tabs> -->
+  <!-- <v-tab>Library</v-tab> -->
+  <!-- <v-tab>Samples</v-tab> -->
+<!-- </v-tabs> -->
+
+<v-card-title class="">
+    <v-btn text
+     class="mr-auto">
+     Samples
+    <v-img
+    src='@/assets/menu_drawer.png'
+    width="16"
+    class="ml-2"
+    ></v-img >
+    </v-btn>
+
+    <v-btn text class="">
+    Characters
+    <v-img
+    src='@/assets/menu.png'
+    width="12"
+    class="ml-2"
+    contain></v-img >
+        </v-btn>
+</v-card-title>
+  <v-text-field
+
   outlined
   label="Search Samples"
   prepend-inner-icon="mdi-magnify"

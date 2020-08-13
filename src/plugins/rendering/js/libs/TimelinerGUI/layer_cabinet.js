@@ -13,6 +13,7 @@ import { utils } from './utils.js'
 import { Theme } from './theme.js'
 // var NumberUI = require('./widget/number')
 import { NumberUI } from './widget/number.js'
+import colors from 'vuetify/lib/util/colors'
 var style = utils.style
 var STORAGE_PREFIX = utils.STORAGE_PREFIX
 
@@ -64,20 +65,19 @@ function LayerCabinet (context) {
   stop_button.onClick(function (e) {
     dispatcher.fire('controls.stop')
   })
-  /*
 
-	var undo_button = new IconButton(16, 'undo', 'undo', dispatcher);
-	style(undo_button.dom, op_button_styles);
-	undo_button.onClick(function() {
-		dispatcher.fire('controls.undo');
-	});
+  var undo_button = new IconButton(16, 'undo', 'undo', dispatcher)
+  style(undo_button.dom, op_button_styles)
+  undo_button.onClick(function () {
+    dispatcher.fire('controls.undo')
+  })
 
-	var redo_button = new IconButton(16, 'repeat', 'redo', dispatcher);
-	style(redo_button.dom, op_button_styles);
-	redo_button.onClick(function() {
-		dispatcher.fire('controls.redo');
-	});
-*/
+  var redo_button = new IconButton(16, 'repeat', 'redo', dispatcher)
+  style(redo_button.dom, op_button_styles)
+  redo_button.onClick(function () {
+    dispatcher.fire('controls.redo')
+  })
+
   var range = document.createElement('input')
   range.type = 'range'
   range.value = 0
@@ -129,7 +129,7 @@ function LayerCabinet (context) {
 
   // Play Controls
   top.appendChild(currentTime.dom)
-  top.appendChild(document.createTextNode('/')) // 0:00:00 / 0:10:00
+  top.appendChild(document.createTextNode('/ ')) // 0:00:00 / 0:10:00
   top.appendChild(totalTime.dom)
   top.appendChild(play_button.dom)
   top.appendChild(stop_button.dom)
@@ -278,40 +278,37 @@ function LayerCabinet (context) {
   upload_alt.onClick(function () {
     dispatcher.fire('openfile')
   })
-  /*
-	var span = document.createElement('span');
-	span.style.width = '20px';
-	span.style.display = 'inline-block';
-	operations_div.appendChild(span);
 
-	operations_div.appendChild(undo_button.dom);
-	operations_div.appendChild(redo_button.dom);
-	operations_div.appendChild(document.createElement('br'));
-*/
+  var span = document.createElement('span')
+  span.style.width = '20px'
+  span.style.display = 'inline-block'
+  operations_div.appendChild(span)
+
+  operations_div.appendChild(undo_button.dom)
+  operations_div.appendChild(redo_button.dom)
+  operations_div.appendChild(document.createElement('br'))
+
   // Cloud Download / Upload edit pencil
 
-  /*
-	// // show layer
-	// var eye_open = new IconButton(16, 'eye_open', 'eye_open', dispatcher);
-	// operations_div.appendChild(eye_open.dom);
+  // show layer
+  // var eye_open = new IconButton(16, 'eye_open', 'eye_open', dispatcher)
+  // operations_div.appendChild(eye_open.dom)
 
-	// // hide / disable layer
-	// var eye_close = new IconButton(16, 'eye_close', 'eye_close', dispatcher);
-	// operations_div.appendChild(eye_close.dom);
+  // // hide / disable layer
+  // var eye_close = new IconButton(16, 'eye_close', 'eye_close', dispatcher)
+  // operations_div.appendChild(eye_close.dom)
 
-	// remove layer
-	var minus = new IconButton(16, 'minus', 'minus', dispatcher);
-	operations_div.appendChild(minus.dom);
+  // // remove layer
+  // var minus = new IconButton(16, 'minus', 'minus', dispatcher)
+  // operations_div.appendChild(minus.dom)
 
-	// check
-	var ok = new IconButton(16, 'ok', 'ok', dispatcher);
-	operations_div.appendChild(ok.dom);
+  // // check
+  // var ok = new IconButton(16, 'ok', 'ok', dispatcher)
+  // operations_div.appendChild(ok.dom)
 
-	// cross
-	var remove = new IconButton(16, 'remove', 'remove', dispatcher);
-	operations_div.appendChild(remove.dom);
-
-	*/
+  // // cross
+  // var remove = new IconButton(16, 'remove', 'remove', dispatcher)
+  // operations_div.appendChild(remove.dom)
 
   // range.addEventListener('change', changeRange);
 

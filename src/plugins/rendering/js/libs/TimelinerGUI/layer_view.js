@@ -13,12 +13,12 @@ function LayerView (context, channelName) {
   var dom = document.createElement('div')
   var label = document.createElement('span')
 
-  label.style.cssText = 'font-size: 12px; padding: 4px;'
+  label.style.cssText = 'font-size: 14px; padding: 4px;'
 
-  var height = (LayoutConstants.LINE_HEIGHT - 1)
+  var height = (LayoutConstants.LINE_HEIGHT)
 
   var keyframe_button = document.createElement('button')
-  keyframe_button.innerHTML = '&#9672;' // '&diams;' &#9671; 9679 9670 9672
+  keyframe_button.innerHTML = '&#9679;' // '&diams;' &#9671; 9679 9670 9672
   keyframe_button.style.cssText = 'background: none; font-size: 12px; padding: 0px; font-family: monospace; float: right; width: 20px; height: ' + height + 'px; border-style:none; outline: none;' //  border-style:inset;
 
   keyframe_button.addEventListener('click', function (e) {
