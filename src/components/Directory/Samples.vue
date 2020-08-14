@@ -6,36 +6,16 @@
   <!-- <v-tab>Samples</v-tab> -->
 <!-- </v-tabs> -->
 
-<v-card-title class="">
-    <v-btn text
-     class="mr-auto">
-     Samples
-    <v-img
-    src='@/assets/menu_drawer.png'
-    width="16"
-    class="ml-2"
-    ></v-img >
-    </v-btn>
-
-    <v-btn text class="">
-    Characters
-    <v-img
-    src='@/assets/menu.png'
-    width="12"
-    class="ml-2"
-    contain></v-img >
-        </v-btn>
-</v-card-title>
   <v-text-field
-
   outlined
   label="Search Samples"
   prepend-inner-icon="mdi-magnify"
   class="ma-0 pa-0 ">
   </v-text-field>
 
+<v-divider></v-divider>
   <v-select
-:item="item"
+:items="items"
 v-model="e2"
 label="">
   </v-select>
@@ -47,7 +27,7 @@ label="">
     :cols="4">
 
     <v-card depressed
-    class="ma-0">
+    class="ma-2">
 
       <v-img
       v-bind:src="element.src"
@@ -62,7 +42,7 @@ label="">
 <script>
 export default {
   data: () => ({
-    item: [
+    items: [
       { text: 'Character' },
       { text: 'Sound' },
       { text: 'Motion' }]

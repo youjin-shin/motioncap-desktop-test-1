@@ -60,6 +60,15 @@ export default {
         ]
       },
       {
+        id: 50,
+        name: 'Collections',
+        children: [
+          { id: 51, name: 'October : pdf' },
+          { id: 52, name: 'November : pdf' },
+          { id: 53, name: 'Tutorial : html' }
+        ]
+      },
+      {
         id: 19,
         name: 'Motion Paths',
         children: [

@@ -1,5 +1,7 @@
+
 <template>
-<v-container fluid class="ma-0 pa-0" depressed>
+<v-container class="pa-4" depressed
+width="auto">
 <!-- <v-tabs> -->
   <!-- <v-tab>Library</v-tab> -->
   <!-- <v-tab>Samples</v-tab> -->
@@ -29,15 +31,15 @@
     <!-- </v-list> -->
     <!-- </v-menu> -->
 
-<v-select outilne
-min-width="10%"
-:items="items"
-v-model="e1"
-label=""
-border: none
->
+<v-select dense
+  min-width="10%"
+  :items="items"
+  label=""
+  v-model="index"
+  class="pa-2">
 </v-select>
-
+<Library v-if="index == 'Library'" />
+<Samples v-if="index == 'Samples'" />
     <!-- <v-menu open-on-hover offset-y depresssed align="end"> -->
     <!-- <template v-slot:activator="{on, attrs}"> -->
     <!-- <v-btn text color="" v-bind="attrs" v-on="on">Characters -->
@@ -63,8 +65,17 @@ border: none
 </template>
 
 <script>
+/* eslint-disable vue/no-unused-components */
+import Library from './Library.vue'
+import Samples from './Samples.vue'
+
 export default {
+  components: {
+    Library,
+    Samples
+  },
   data: () => ({
+    index: 'Library',
     items: [
       { text: 'Library' },
       { text: 'Samples' }]

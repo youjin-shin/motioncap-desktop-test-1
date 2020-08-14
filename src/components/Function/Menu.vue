@@ -1,15 +1,12 @@
 <template>
-  <v-card depressed
-  class="ma-0 pa-0"
-  >
-  <div>
-    <v-menu open-on-hover offset-y depressed>
-      <template v-slot:activator="{ on, attrs }">
+
+  <div class="pa-4">
+    <!-- <v-menu open-on-hover offset-y depressed>
+    <template v-slot:activator="{ on, attrs }">
    <v-btn text
     v-bind="attrs"
     v-on="on">
     Function
-    <v-model></v-model>
     <v-img
     src='@/assets/menu.png'
     width="12"
@@ -17,29 +14,55 @@
     contain></v-img >
     </v-btn>
       </template>
+
       <v-list max-height="100%" activator>
         <v-list-item
-        v-for="(item, index) in items"
-        :key="index"
-        @click="index">
+        v-for="(item, indexs) in items"
+        :key="indexs"
+        @click="indexs">
         <v-icon class="mr-2"> mdi-menu-right-outline </v-icon>
         <v-list-item-title > {{ item.title }} </v-list-item-title>
         </v-list-item>
+        <v-list-item>
+          </v-list-item>
       </v-list>
-  </v-menu>
+      </v-menu> -->
+<v-select dense
+  min-width="10%"
+  :items="items"
+  label=""
+  v-model="index"
+  class="pa-2">
+</v-select>
+      <Rigging v-if="index == 'Rigging'" />
+      <Lighting v-if="index == 'Lighting'" />
+      <Rendering v-if="index == 'Rendering'" />
+      <Properties v-if="index == 'Properties'" />
   </div>
-  </v-card>
+
 </template>
 
 <script>
+import Rigging from './Rigging.vue'
+import Lighting from './Lighting.vue'
+import Properties from './Properties.vue'
+import Rendering from './Rendering.vue'
+
 export default {
+  components: {
+    Rigging,
+    Lighting,
+    Properties,
+    Rendering
+  },
+
   data: () => ({
+    index: 'Rigging',
     items: [
-      { title: 'Rigging' },
-      { title: 'Lighting' },
-      { title: 'Rendering' },
-      { title: 'Properties' }
-    ]
+      { text: 'Rigging' },
+      { text: 'Lighting' },
+      { text: 'Rendering' },
+      { text: 'Properties' }]
   })
 }
 </script>

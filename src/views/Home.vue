@@ -1,5 +1,4 @@
 <template>
-
 <v-container
   class="main-container px-7"
   fluid
@@ -9,18 +8,18 @@
   <v-row>
     <v-col cols="2.5" class="pa-1">
       <div class="section-card ">
-      <!-- <Samples /> -->
+      <Directory />
       </div>
     </v-col>
 <!-- style="align-self: baseline" -->
-    <v-col style="height: fit-content;" cols="7" class="pa-1" >
+    <v-col cols="7" class="pa-1" >
       <div class="section-card">
         <RenderingSection @initTimeline="initTimeline"/>
       </div>
     </v-col>
     <v-col cols="2.5" class="pa-1">
       <div class="section-card ">
-      <!-- <Properties/> -->
+      <Menu />
       </div>
     </v-col>
     <v-col cols="12" class="pa-1">
@@ -35,7 +34,6 @@
 </v-layout>
 
 </v-container>
-
 </template>
 
 <style>
@@ -56,11 +54,12 @@ import RenderingSection from '@/components/Rendering/RenderingSection.vue'
 import Samples from '@/components/Directory/Samples.vue'
 import Properties from '@/components/Function/Properties.vue'
 import TimelineSection from '@/components/Rendering/Timeliner.vue'
+import Directory from '@/components/Directory/Directory.vue'
+import Menu from '@/components/Function/Menu.vue'
 
 export default {
   name: 'Home',
   components: {
-
     // eslint-disable-next-line vue/no-unused-components
     RenderingSection,
     // eslint-disable-next-line vue/no-unused-components
@@ -68,7 +67,9 @@ export default {
     // eslint-disable-next-line vue/no-unused-components
     Properties,
     // eslint-disable-next-line vue/no-unused-components
-    TimelineSection
+    TimelineSection,
+    Directory,
+    Menu
 
   },
   data () {

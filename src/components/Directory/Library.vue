@@ -1,32 +1,15 @@
 <template>
-<nav>
-  <v-card
-    class="ma-0 pa-0"
-  >
-  <v-navigation-drawer fluid>
-    <v-list-item>
-      <v-list-item-content>
-        <v-list-item-title class="title">
-            <v-btn icon
-          class="ml-10"><v-icon>mdi-plus</v-icon></v-btn>
-        </v-list-item-title>
-      </v-list-item-content>
-    </v-list-item>
-        <v-divider></v-divider>
+<nav class="ma-0 pa-0">
+  <v-navigation-drawer depressed class="ma-0 pa-0" width="auto">
 
-    <v-list dense>
-        <v-btn icon
-        class="ml-2">
-           <v-icon> mdi-magnify</v-icon>
-           </v-btn>
-        <v-list-title
-        class="ma-0">
-        Search Projects</v-list-title>
-    </v-list>
-
-    <v-divider></v-divider>
-    <v-list
-    class="ma-0 pa-0">
+<v-container depressed
+  class="ma-0 pa-0">
+  <v-text-field
+  solo
+  label="Search Samples"
+  prepend-inner-icon="mdi-magnify"
+  class="ma-0 pa-0 ">
+  </v-text-field>
 
       <v-list-group
         prepend-icon="mdi-folder-outline"
@@ -80,11 +63,19 @@
           </v-list-item>
         </v-list-group>
       </v-list-group>
-    </v-list>
+
+  </v-container>
     </v-navigation-drawer>
-  </v-card>
 </nav>
+
 </template>
+
+<style>
+.Listbox {
+  /* overflow: hidden; */
+  background: #f5f5f5;
+}
+</style>
 
 <script>
 export default {
