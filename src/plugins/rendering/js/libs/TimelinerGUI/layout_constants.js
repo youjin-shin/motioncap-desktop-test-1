@@ -11,7 +11,7 @@ var LayoutConstants = {
   WIDTH: 600,
   HEIGHT: 400,
   TIMELINE_SCROLL_HEIGHT: 0,
-  LEFT_PANE_WIDTH: window.innerWidth / 4,
+  LEFT_PANE_WIDTH: window.innerWidth / 5,
   TIME_SCALE: DEFAULT_TIME_SCALE, // number of pixels to 1 second
   default_length: 20, // seconds
   DEFAULT_TIME_SCALE

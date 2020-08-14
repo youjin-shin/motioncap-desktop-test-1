@@ -1,49 +1,60 @@
 <template>
 <v-container
-  class="main-container px-7"
+  class="main-container px-0"
   fluid
   fill-height
+  align-start
 >
-<v-layout row wrap>
-  <v-row>
-    <v-col cols="2.5" class="pa-1">
-      <div class="section-card ">
-      <!-- <Samples /> -->
-      </div>
-    </v-col>
-<!-- style="align-self: baseline" -->
-    <v-col style="height: fit-content;" cols="7" class="pa-1" >
-      <div class="section-card">
-        <RenderingSection @initTimeline="initTimeline"/>
-      </div>
-    </v-col>
-    <v-col cols="2.5" class="pa-1">
-      <div class="section-card ">
-      <!-- <Properties/> -->
-      </div>
-    </v-col>
-    <v-col cols="12" class="pa-1">
-    <div class="section-card pa-2">
-      <TimelineSection ref="TimelineSection"/>
-    </div>
-    </v-col>
-  </v-row>
+  <v-container
+    class="main-container px-7 py-0"
+    fluid
 
-  <!-- <v-row>
-  </v-row> -->
-</v-layout>
+  >
+    <v-row>
+      <v-col cols="2" class="" style="padding: 2px;">
+        <div class="section-card ">
+        <!-- <Samples /> -->
+        </div>
+      </v-col>
+  <!-- style="align-self: baseline" -->
+      <v-col  cols="8" class=""  style="padding: 2px;">
+        <div class="section-card">
+          <RenderingSection @initTimeline="initTimeline"/>
+        </div>
+      </v-col>
+      <v-col cols="2" class=""  style="padding: 2px;">
+        <div class="section-card ">
+        <!-- <Properties/> -->
+        </div>
+      </v-col>
+    </v-row>
+  </v-container>
+
+  <v-container
+    class="main-container px-7 py-0"
+    fluid
+  >
+    <v-row style="height: 31vh" >
+      <v-col cols="12" class="py-0" style="padding: 2px;" >
+      <div  class="section-card pa-2">
+        <TimelineSection ref="TimelineSection"/>
+      </div>
+      </v-col>
+    </v-row>
+
+  </v-container>
 
 </v-container>
 </template>
 
 <style>
 .main-container {
-  background: #e6e6e6;
+  background: #222222;
 }
 .section-card {
   border-radius: 5px 5px;
   overflow: hidden;
-  background: #f5f5f5;
+  background: #1f1f1f;
   height: 100%;
 }
 </style>

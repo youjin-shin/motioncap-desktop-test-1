@@ -21,6 +21,7 @@ import { OrbitControls } from '@/plugins/rendering/jsm/controls/cameraOrbitContr
 // import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 import { TransformControls } from '@/plugins/rendering/jsm/controls/transformControls.js'
 
+import { Theme } from '@/plugins/rendering/js/libs/TimelinerGUI/theme.js'
 // import { Timeliner } from '@/plugins/rendering/js/libs/TimelinerGUI/timeliner.js'
 // import { TimelinerController } from '@/plugins/rendering/jsm/controls/TimelinerController.js'
 
@@ -50,7 +51,7 @@ export default {
 
       // path: '/models/fbx/Zepeto.fbx',
       actions: [],
-      bonePivotSize: 0.2,
+      bonePivotSize: 1.2,
       settings: [],
       weights: [],
       trackInfo: [],
@@ -60,6 +61,8 @@ export default {
     }
   },
   mounted () {
+    // setTimeout(() => {
+    // }, 1000)
     this.init()
   },
   methods: {
@@ -70,43 +73,51 @@ export default {
 
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / (window.innerHeight), 1, 1000)
       camera.position.set(3, 3, -5)
+
+      camera.lookAt(0, 1, 0)
+
       clock = new THREE.Clock()
       // scene.add(clock)
 
       scene = new THREE.Scene()
-      scene.background = new THREE.Color(0xe6e6e6)
-      scene.fog = new THREE.Fog(0x303030, 10, 50)
+      scene.background = new THREE.Color(Theme.renderingBackgroundDark)
+      scene.fog = new THREE.Fog(Theme.renderingBackgroundDark, 10, 50)
 
       grid = new THREE.GridHelper(16, 16, 0xff0000, 0x222222)
       scene.add(grid)
-
-      var hemiLight = new THREE.HemisphereLight(0xffffff, 0xe6e6e6)
+      var hemiLight = new THREE.HemisphereLight(0x0e0e0e)
       hemiLight.position.set(0, 20, 0)
-      scene.add(hemiLight)
 
-      var dirLight = new THREE.DirectionalLight(0xffffff)
-      dirLight.position.set(-3, 10, -10)
-      dirLight.castShadow = true
-      dirLight.shadow.camera.top = 2
-      dirLight.shadow.camera.bottom = -2
-      dirLight.shadow.camera.left = -2
-      dirLight.shadow.camera.right = 2
-      dirLight.shadow.camera.near = 0.1
-      dirLight.shadow.camera.far = 40
-      scene.add(dirLight)
+      // var dirLight = new THREE.DirectionalLight(0xffffff)
+      // dirLight.position.set(-3, 10, -10)
+      // dirLight.castShadow = true
+      // dirLight.shadow.camera.top = 2
+      // dirLight.shadow.camera.bottom = -2
+      // dirLight.shadow.camera.left = -2
+      // dirLight.shadow.camera.right = 2
+      // dirLight.shadow.camera.near = 0.1
+      // dirLight.shadow.camera.far = 40
+      // scene.add(dirLight)
+
+      var spotLight = this.createSpotlight(0xFFFFFF)
+      spotLight.position.set(-5, 10, -5)
+      var spotLightHelper = new THREE.SpotLightHelper(spotLight)
+
+      scene.add(hemiLight, spotLightHelper, spotLight)
 
       // scene.add(new CameraHelper(light.shadow.camera))
 
       // ground
-      // var mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(100, 100), new THREE.MeshPhongMaterial({ color: 0xf5f5f5, depthWrite: false }))
-      // mesh.rotation.x = -Math.PI / 2
-      // mesh.receiveShadow = true
-      // scene.add(mesh)
+      var mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(100, 100), new THREE.MeshPhongMaterial({ color: Theme.renderingBackgroundDark, depthWrite: false }))
+      mesh.position.set(0, -0.01, 0)
+      mesh.rotation.x = -Math.PI / 2
+      mesh.receiveShadow = true
+      scene.add(mesh)
 
       renderer = new THREE.WebGLRenderer({ antialias: true })
       renderer.setPixelRatio(window.devicePixelRatio)
-      console.log(this.sectionContainer.clientHeight)
       renderer.setSize(window.innerWidth, window.innerHeight)
+      renderer.shadowMap.enabled = true
       // renderer.setSize(this.sectionContainer.clientWidth, this.sectionContainer.clientHeight)
       renderer.outputEncoding = THREE.sRGBEncoding
 
@@ -521,6 +532,17 @@ export default {
       // if (actionWeights[0] === 1) {
       //   crossFadeControls[0].setEnabled()
       // }
+    },
+    createSpotlight: function (color) {
+      var newObj = new THREE.SpotLight(color, 2)
+
+      newObj.castShadow = true
+      newObj.angle = 0.25
+      newObj.penumbra = 0.2
+      newObj.decay = 2
+      newObj.distance = 50
+
+      return newObj
     },
 
     onWindowResize: function () {

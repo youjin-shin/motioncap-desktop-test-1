@@ -25108,7 +25108,7 @@ function WebGLRenderer( parameters ) {
 		if ( updateStyle !== false ) {
 
 			_canvas.style.width = 100 + '%';
-			_canvas.style.height = 100 + '%';
+			_canvas.style.height = '100%';
 
 		}
 		this.setViewport( 0, 0, width, height );
@@ -47511,7 +47511,7 @@ function SkeletonHelper( object ) {
 	const colors = [];
 
 	const color1 = new Color( 0, 1, 0 );
-	const color2 = new Color( 0, 1, 0 );
+	const color2 = new Color( 0, 0, 1 );
 
 	for ( let i = 0; i < bones.length; i ++ ) {
 
