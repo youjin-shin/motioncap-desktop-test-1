@@ -83,8 +83,8 @@ export default {
       scene.background = new THREE.Color(Theme.renderingBackgroundDark)
       scene.fog = new THREE.Fog(Theme.renderingBackgroundDark, 10, 50)
 
-      grid = new THREE.GridHelper(16, 16, 0xff0000, 0x222222)
-      scene.add(grid)
+      // grid = new THREE.GridHelper(16, 16, 0xff0000, 0x222222)
+      // scene.add(grid)
       var hemiLight = new THREE.HemisphereLight(0x0e0e0e)
       hemiLight.position.set(0, 20, 0)
 
@@ -107,13 +107,6 @@ export default {
 
       // scene.add(new CameraHelper(light.shadow.camera))
 
-      // ground
-      var mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(100, 100), new THREE.MeshPhongMaterial({ color: Theme.renderingBackgroundDark, depthWrite: false }))
-      mesh.position.set(0, -0.01, 0)
-      mesh.rotation.x = -Math.PI / 2
-      mesh.receiveShadow = true
-      scene.add(mesh)
-
       renderer = new THREE.WebGLRenderer({ antialias: true })
       renderer.setPixelRatio(window.devicePixelRatio)
       renderer.setSize(window.innerWidth, window.innerHeight)
@@ -122,6 +115,22 @@ export default {
       renderer.outputEncoding = THREE.sRGBEncoding
 
       this.container.appendChild(renderer.domElement)
+
+      // ground
+      var texture = new THREE.TextureLoader().load('textures/texture_01.png', this.render)
+      texture.wrapS = THREE.RepeatWrapping
+      texture.wrapT = THREE.RepeatWrapping
+      texture.repeat.set(50, 50)
+      var mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(100, 100),
+        new THREE.MeshPhongMaterial({
+          color: Theme.renderingBackgroundDark,
+          map: texture,
+          depthWrite: false
+        }))
+      mesh.position.set(0, -0, 0)
+      mesh.rotation.x = -Math.PI / 2
+      mesh.receiveShadow = true
+      scene.add(mesh)
 
       stats = new Stats()
       // this.container.appendChild(stats.dom)

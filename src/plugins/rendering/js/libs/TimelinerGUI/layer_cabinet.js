@@ -78,6 +78,17 @@ function LayerCabinet (context) {
     dispatcher.fire('controls.redo')
   })
 
+  var curveEditor = new IconButton(16, 'repeat', 'redo', dispatcher)
+  style(curveEditor.dom, op_button_styles)
+  curveEditor.onClick(function () {
+    dispatcher.fire('controls.curveEditor')
+  })
+  var dopesheetEditor = new IconButton(16, 'repeat', 'redo', dispatcher)
+  style(dopesheetEditor.dom, op_button_styles)
+  dopesheetEditor.onClick(function () {
+    dispatcher.fire('controls.dopesheetEditor')
+  })
+
   var range = document.createElement('input')
   range.type = 'range'
   range.value = 0
@@ -286,6 +297,8 @@ function LayerCabinet (context) {
 
   operations_div.appendChild(undo_button.dom)
   operations_div.appendChild(redo_button.dom)
+  operations_div.appendChild(curveEditor.dom)
+  operations_div.appendChild(dopesheetEditor.dom)
   operations_div.appendChild(document.createElement('br'))
 
   // Cloud Download / Upload edit pencil

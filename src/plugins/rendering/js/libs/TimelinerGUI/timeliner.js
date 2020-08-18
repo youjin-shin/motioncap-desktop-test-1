@@ -12,7 +12,8 @@ import { LayoutConstants } from './layout_constants.js'
 import { utils } from './utils.js'
 import { LayerCabinet } from './layer_cabinet.js'
 
-import { TimelinePanel } from './timeline_panel.js'
+import { DopeSheetPanel } from './dopesheet_panel.js'
+import { CurvePanel } from './curve_panel.js'
 
 import { IconButton } from './widget/icon_button.js'
 
@@ -64,8 +65,11 @@ function Timeliner (controller) {
     controller: controller
 
   }
+  var currentEditor
+  var curveEditor = new CurvePanel(context)
+  var dopeSheetEditor = new DopeSheetPanel(context)
+  currentEditor = dopeSheetEditor
 
-  var timeline = new TimelinePanel(context)
   var layer_panel = new LayerCabinet(context)
 
   var undo_manager = new UndoManager(dispatcher)
@@ -161,13 +165,13 @@ function Timeliner (controller) {
   dispatcher.on('totalTime.update', function (value) {
     context.totalTime = value
     controller.setDuration(value)
-    timeline.repaint()
+    currentEditor.repaint()
   })
 
   dispatcher.on('update.scale', function (v) {
     context.timeScale = v
-    timeline.setTimeScale(v)
-    timeline.repaint()
+    currentEditor.setTimeScale(v)
+    currentEditor.repaint()
   })
 
   // handle undo / redo
@@ -187,6 +191,21 @@ function Timeliner (controller) {
 
 		updateState();
 */
+  })
+
+  dispatcher.on('controls.curveEditor', function () {
+    currentEditor = curveEditor
+    console.log(currentEditor)
+    // currentEditor.repaint()
+
+    repaintAll()
+  })
+  dispatcher.on('controls.dopesheetEditor', function () {
+    currentEditor = dopeSheetEditor
+    console.log(currentEditor)
+    // currentEditor.repaint()
+
+    repaintAll()
   })
 
   /*
@@ -212,16 +231,16 @@ function Timeliner (controller) {
       // console.log(container.clientHeight)
       div.style.height = 100 + '%'
 
-      restyle(layer_panel.dom, timeline.dom)
+      restyle(layer_panel.dom, currentEditor.dom)
 
-      timeline.resize()
+      currentEditor.resize()
       repaintAll()
       needsResize = false
 
       dispatcher.fire('resize')
     }
 
-    timeline._paint()
+    currentEditor._paint()
   }
 
   paint()
@@ -295,7 +314,7 @@ function Timeliner (controller) {
 
   function updateState () {
     layer_panel.updateState()
-    timeline.updateState()
+    currentEditor.updateState()
 
     repaintAll()
   }
@@ -306,7 +325,7 @@ function Timeliner (controller) {
     scrollbar.setLength(context.scrollHeight / content_height)
 
     layer_panel.repaint()
-    timeline.repaint()
+    currentEditor.repaint()
   }
 
   function promptImport () {
@@ -553,7 +572,7 @@ function Timeliner (controller) {
   // container.appendChild(ghostpane)
 
   div.appendChild(layer_panel.dom)
-  div.appendChild(timeline.dom)
+  div.appendChild(currentEditor.dom)
 
   div.appendChild(scrollbar.dom)
 
@@ -562,7 +581,7 @@ function Timeliner (controller) {
     switch (type) {
       case 'scrollto':
         layer_panel.scrollTo(scrollTo)
-        timeline.scrollTo(scrollTo)
+        currentEditor.scrollTo(scrollTo)
         break
       // case 'pageup':
       //   scrollTop -= pageOffset

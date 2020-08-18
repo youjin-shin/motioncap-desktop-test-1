@@ -28,7 +28,7 @@ var frame_start = 0 // this is the current scroll position.
 var tickMark1, tickMark2, tickMark3
 
 function time_scaled () {
-  var div = 60
+  var div = 600
 
   tickMark1 = time_scale / div
   tickMark2 = 2 * tickMark1
@@ -38,16 +38,16 @@ function time_scaled () {
 time_scaled()
 
 /**************************/
-// Timeline Panel
+// Curve Panel
 /**************************/
 
-function TimelinePanel (context) {
+function CurvePanel (context) {
   var dispatcher = context.dispatcher
 
   var scrollTop = 0; var scrollLeft = 0
 
   var dpr = window.devicePixelRatio
-  var canvas = document.createElement('canvas')
+  var curveCanvas = document.createElement('canvas')
 
   var layers
 
@@ -65,17 +65,17 @@ function TimelinePanel (context) {
 
   this.resize = function () {
     dpr = window.devicePixelRatio
-    canvas.width = context.controller.getContainerWidth() * dpr - LayoutConstants.LEFT_PANE_WIDTH
-    canvas.height = (context.height) * dpr
-    canvas.style.width = context.controller.getContainerWidth() - LayoutConstants.LEFT_PANE_WIDTH + 'px'
-    canvas.style.height = context.height + 'px'
+    curveCanvas.width = context.controller.getContainerWidth() * dpr - LayoutConstants.LEFT_PANE_WIDTH
+    curveCanvas.height = (context.height) * dpr
+    curveCanvas.style.width = context.controller.getContainerWidth() - LayoutConstants.LEFT_PANE_WIDTH + 'px'
+    curveCanvas.style.height = context.height + 'px'
     context.scrollHeight = context.height - MARKER_TRACK_HEIGHT
   }
 
-  this.dom = canvas
+  this.dom = curveCanvas
   this.resize()
 
-  var ctx = canvas.getContext('2d')
+  var ctx = curveCanvas.getContext('2d')
   var ctx_wrap = proxy_ctx(ctx)
 
   var current_frame // currently in seconds
@@ -117,13 +117,13 @@ function TimelinePanel (context) {
 
     this.mouseover = function () {
       isOver = true
-      canvas.style.cursor = 'move' // pointer move ew-resize
+      curveCanvas.style.cursor = 'move' // pointer move ew-resize
       self.paint(ctx_wrap)
     }
 
     this.mouseout = function () {
       isOver = false
-      canvas.style.cursor = 'default'
+      curveCanvas.style.cursor = 'default'
       self.paint(ctx_wrap)
     }
 
@@ -324,7 +324,7 @@ function TimelinePanel (context) {
     // background
 
     ctx.fillStyle = Theme.a
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.clearRect(0, 0, curveCanvas.width, curveCanvas.height)
     ctx.save()
     ctx.scale(dpr, dpr)
 
@@ -476,8 +476,8 @@ function TimelinePanel (context) {
 
   document.addEventListener('mousemove', onMouseMove)
 
-  canvas.addEventListener('dblclick', function (e) {
-    canvasBounds = canvas.getBoundingClientRect()
+  curveCanvas.addEventListener('dblclick', function (e) {
+    canvasBounds = curveCanvas.getBoundingClientRect()
     var mx = e.clientX - canvasBounds.left; var my = e.clientY - canvasBounds.top
 
     var track = y_to_track(my)
@@ -487,7 +487,7 @@ function TimelinePanel (context) {
   })
 
   function onMouseMove (e) {
-    canvasBounds = canvas.getBoundingClientRect()
+    canvasBounds = curveCanvas.getBoundingClientRect()
     var mx = e.clientX - canvasBounds.left; var my = e.clientY - canvasBounds.top
     onPointerMove(mx, my)
   }
@@ -501,12 +501,12 @@ function TimelinePanel (context) {
     pointer = { x: x, y: y }
   }
 
-  canvas.addEventListener('mouseout', function () {
+  curveCanvas.addEventListener('mouseout', function () {
     pointer = null
   })
 
   var mousedown2 = false; var mouseDownThenMove = false
-  utils.handleDrag(canvas, function down (e) {
+  utils.handleDrag(curveCanvas, function down (e) {
     mousedown2 = true
     pointer = {
       x: e.offsetx,
@@ -546,7 +546,7 @@ function TimelinePanel (context) {
 
   var draggingx
 
-  utils.handleDrag(canvas, function down (e) {
+  utils.handleDrag(curveCanvas, function down (e) {
     draggingx = scroller.left
   }, function move (e) {
     context.scrollTime = Math.max(0, (draggingx + e.dx) / scroller.k)
@@ -561,4 +561,4 @@ function TimelinePanel (context) {
   /** * End handling for scrollbar ***/
 }
 
-export { TimelinePanel }
+export { CurvePanel }
