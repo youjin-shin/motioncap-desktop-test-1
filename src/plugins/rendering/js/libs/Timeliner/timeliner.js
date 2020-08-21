@@ -1,7 +1,3 @@
-/* eslint-disable no-undef */
-/*
- * @author Joshua Koo http://joshuakoo.com
- */
 /* eslint-disable no-unused-vars */
 /* eslint-disable camelcase */
 /* eslint-disable no-tabs */
@@ -347,10 +343,10 @@ function Timeliner (controller) {
     promptImport()
   })
 
-  dispatcher.on('new', function () {
-    data.blank()
-    updateState()
-  })
+  // dispatcher.on('new', function () {
+  //   data.blank()
+  //   updateState()
+  // })
 
   dispatcher.on('openfile', function () {
     openAs(function (data) {
@@ -666,17 +662,17 @@ function Timeliner (controller) {
     right.style.left = LayoutConstants.LEFT_PANE_WIDTH + 'px'
   }
 
-  // Need to fix
-  function addLayer (name) {
-    var layer = new LayerProp(name)
+  // // Need to fix
+  // function addLayer (name) {
+  //   var layer = new LayerProp(name)
 
-    layers = layer_store.value
-    layers.push(layer)
+  //   layers = layer_store.value
+  //   layers.push(layer)
 
-    layer_panel.updateState()
-  }
+  //   layer_panel.updateState()
+  // }
 
-  this.addLayer = addLayer
+  // this.addLayer = addLayer
 
   this.dispose = function dispose () {
     var domParent = pane.parentElement

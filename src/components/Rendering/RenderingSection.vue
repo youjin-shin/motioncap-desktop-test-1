@@ -21,7 +21,7 @@ import { OrbitControls } from '@/plugins/rendering/jsm/controls/cameraOrbitContr
 // import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 import { TransformControls } from '@/plugins/rendering/jsm/controls/transformControls.js'
 
-import { Theme } from '@/plugins/rendering/js/libs/TimelinerGUI/theme.js'
+import { Theme } from '@/plugins/rendering/js/libs/Timeliner/theme.js'
 // import { Timeliner } from '@/plugins/rendering/js/libs/TimelinerGUI/timeliner.js'
 // import { TimelinerController } from '@/plugins/rendering/jsm/controls/TimelinerController.js'
 
