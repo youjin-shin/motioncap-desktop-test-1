@@ -10,43 +10,27 @@ import {
 // } from '../../../../../node_modules/three/build/three.module.js'
 } from '../../build/three.module'
 
-// var TimelinerController = function TimelinerController (scene, trackInfo, onUpdate, container) {
-//   this._scene = scene
-//   this._trackInfo = trackInfo
-//   this._container = container
+var TimelinerController = function TimelinerController (scene, trackInfo, onUpdate, container) {
+  this._scene = scene
+  this._trackInfo = trackInfo
+  this._container = container
 
-//   this._onUpdate = onUpdate
+  this._onUpdate = onUpdate
 
-//   this._mixer = new AnimationMixer(scene)
-//   this._clip = null
-//   this._action = null
+  this._mixer = new AnimationMixer(scene)
+  this._clip = null
+  this._action = null
 
-//   this._tracks = []
-//   this._propRefs = {}
-//   this._channelNames = []
-// }
+  this._tracks = []
+  this._propRefs = {}
+  this._channelNames = []
+}
 
-class TimelinerController {
-  constructor (scene, trackInfo, onUpdate, container) {
-    this._scene = scene
-    this._trackInfo = trackInfo
-    this._container = container
+TimelinerController.prototype = {
 
-    this._onUpdate = onUpdate
+  constructor: TimelinerController,
 
-    this._mixer = new AnimationMixer(scene)
-    this._clip = null
-    this._action = null
-
-    this._tracks = []
-    this._propRefs = {}
-    this._channelNames = []
-
-    this.init()
-  }
-
-  init () {
-    console.log('called')
+  init: function () {
     var tracks = []
     var trackInfo = this._trackInfo
 
@@ -59,41 +43,36 @@ class TimelinerController {
     this._clip = new AnimationClip('editclip', 0, tracks)
     // console.log(this._clip)
     this._action = this._mixer.clipAction(this._clip).play()
-  }
+  },
 
-  setDisplayTime (time) {
+  setDisplayTime: function (time) {
     this._action.time = time
 
     // console.log(time)
     this._mixer.update(0)
     this._onUpdate()
-  }
+  },
 
-  setDuration (duration) {
+  setDuration: function (duration) {
     this._clip.duration = duration
-  }
-
-  getContainer () {
+  },
+  getContainer: function () {
     return this._container
-  }
-
-  getContainerWidth () {
+  },
+  getContainerWidth: function () {
     return this._container.clientWidth
-  }
-
-  getContainerHeight () {
+  },
+  getContainerHeight: function () {
     return this._container.clientHeight
-  }
-
-  getTracks () {
+  },
+  getTracks: function () {
     return this._tracks
-  }
-
-  getChannelNames () {
+  },
+  getChannelNames: function () {
     return this._channelNames
-  }
+  },
 
-  getChannelKeyTimes (channelName) {
+  getChannelKeyTimes: function (channelName) {
     // console.log(this._tracks[ channelName ])
     // for (let i = 0; i < this._tracks.length; i++) {
     // 	if(this._tracks[i].name === channelName)
@@ -102,9 +81,9 @@ class TimelinerController {
     // }
     return this._tracks.find(item => item.name === channelName).times
     // return this._tracks[ channelName ].times;
-  }
+  },
 
-  setKeyframe (channelName, time) {
+  setKeyframe: function (channelName, time) {
     // console.log(this._tracks.find(item=>item.name==channelName))
     // console.log(this._tracks)
     // var track = this._tracks[channelName]
@@ -138,9 +117,9 @@ class TimelinerController {
     // console.log(channelName)
     // this._propRefs.channelName.getValue(values, offset)
     this._propRefs[channelName].getValue(values, offset)
-  }
+  },
 
-  delKeyframe (channelName, time) {
+  delKeyframe: function (channelName, time) {
     // var track = this._tracks[ channelName ],
 
     var track = this._tracks.find(item => item.name === channelName)
@@ -171,9 +150,9 @@ class TimelinerController {
 
       values.length = nValues
     }
-  }
+  },
 
-  moveKeyframe (channelName, time, delta, moveRemaining) {
+  moveKeyframe: function (channelName, time, delta, moveRemaining) {
     // var track = this._tracks[ channelName ],
 
     var track = this._tracks.find(item => item.name === channelName)
@@ -189,9 +168,9 @@ class TimelinerController {
 
       if (needsSort) this._sort(track)
     }
-  }
+  },
 
-  serialize () {
+  serialize: function () {
     var result = {
       duration: this._clip.duration,
       channels: {}
@@ -215,9 +194,9 @@ class TimelinerController {
     }
 
     return result
-  }
+  },
 
-  deserialize (structs) {
+  deserialize: function (structs) {
     var names = this._channelNames
     var tracks = this._tracks
 
@@ -244,9 +223,9 @@ class TimelinerController {
 
     // update display
     this.setDisplayTime(this._mixer.time)
-  }
+  },
 
-  // deserialize (structs) {
+  // deserialize: function (structs) {
   //   var names = this._channelNames
   //   var tracks = this._tracks
 
@@ -265,9 +244,9 @@ class TimelinerController {
 
   //   // update display
   //   this.setDisplayTime(this._mixer.time)
-  // }
+  // },
 
-  _sort (track) {
+  _sort: function (track) {
     var times = track.times
     var order = AnimationUtils.getKeyframeOrder(times)
 
@@ -277,14 +256,14 @@ class TimelinerController {
     var stride = track.getValueSize()
 
     this._setArray(values, AnimationUtils.sortedArray(values, stride, order))
-  }
+  },
 
-  _setArray (dst, src) {
+  _setArray: function (dst, src) {
     dst.length = 0
     dst.push.apply(dst, src)
-  }
+  },
 
-  _addTrack (type, prop, initialValue, interpolation) {
+  _addTrack: function (type, prop, initialValue, interpolation) {
     var track = new type(prop, [0], initialValue, interpolation)
 
     // data must be in JS arrays so it can be resized
@@ -300,6 +279,7 @@ class TimelinerController {
 
     return track
   }
+
 }
 
 export { TimelinerController }

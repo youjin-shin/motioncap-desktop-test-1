@@ -36,7 +36,7 @@
   >
     <v-row style="height: 31vh" >
       <v-col cols="12" class="py-0" style="padding: 2px;" >
-      <div  class="section-card pa-2">
+      <div  class="section-card pa-2 pt-0">
         <TimelineSection ref="TimelineSection"/>
       </div>
       </v-col>

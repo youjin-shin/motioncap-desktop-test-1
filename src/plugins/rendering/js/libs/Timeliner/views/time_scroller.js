@@ -24,7 +24,7 @@ Rect.prototype.set = function (x, y, w, h, color, outline) {
 }
 
 Rect.prototype.paint = function (ctx) {
-  ctx.fillStyle = Theme.b // // 'yellow';
+  ctx.fillStyle = Theme.d // // 'yellow';
   ctx.strokeStyle = Theme.b
 
   this.shape(ctx)

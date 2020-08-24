@@ -16,8 +16,8 @@ const SNAP_DOCK_BOTTOM = 'dock-bottom'
 function setBounds (element, x, y, w, h) {
   element.style.left = x + 'px'
   element.style.top = y + 'px'
-  element.style.width = w + 'px'
-  element.style.height = h + 'px'
+  element.style.width = 100 + '%'
+  element.style.height = 100 + '%'
 }
 
 /*
@@ -56,8 +56,11 @@ args eg.
 	})
 */
 
-function DockingWindow (pane, ghostpane) {
+var pane
+function DockingWindow (panel, ghostpane) {
   'use strict'
+
+  pane = panel
 
   // Minimum resizable area
   var minWidth = 100
@@ -103,7 +106,7 @@ function DockingWindow (pane, ghostpane) {
     } else {
       setBounds(pane, bounds.left, bounds.top, bounds.width, bounds.height)
       calculateBounds()
-      snapType = null
+      // snapType = null
       preSnapped = null
     }
   }
@@ -324,8 +327,11 @@ function DockingWindow (pane, ghostpane) {
         top = window.innerHeight - height
         break
       case SNAP_DOCK_BOTTOM:
-        width = bounds.width
+        width = window.innerWidth
         height = bounds.height
+
+        // width = bounds.width
+        // height = bounds.height
         left = (window.innerWidth - width) * 0.5
         top = window.innerHeight - height
     }
@@ -337,10 +343,11 @@ function DockingWindow (pane, ghostpane) {
   function resizeEdges () {
     if (!snapType) return
 
+    snapType = SNAP_DOCK_BOTTOM
+
     calcSnapBounds(snapType)
     var { left, top, width, height } = snapBounds
     setBounds(pane, left, top, width, height)
-
     self.resizes.fire(width, height)
   }
 

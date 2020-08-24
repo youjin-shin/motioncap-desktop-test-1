@@ -5,6 +5,7 @@
 /* eslint-disable no-tabs */
 import { Do } from '../utils/do.js'
 import { utils } from '../utils/utils.js'
+import { Theme } from '../theme.js'
 
 // ********** class: ScrollBar ****************** //
 /*
@@ -19,16 +20,19 @@ var scrolltrack_style = {
   // right: '0',
   // top: '0',
   // bottom: '0',
-  background: '-webkit-gradient(linear, left top, right top, color-stop(0, rgb(29,29,29)), color-stop(0.6, rgb(50,50,50)) )',
-  border: '1px solid rgb(29, 29, 29)',
+  // background: '-webkit-gradient(linear, left top, right top, color-stop(0, rgb(29,29,29)), color-stop(0.6, rgb(50,50,50)) )',
+  background: Theme.b,
+
+  // border: '1px solid rgb(29, 29, 29)',
   // zIndex: '1000',
   textAlign: 'center',
   cursor: 'pointer'
 }
 
 var scrollbar_style = {
-  background: '-webkit-gradient(linear, left top, right top, color-stop(0.2, rgb(88,88,88)), color-stop(0.6, rgb(64,64,64)) )',
-  border: '1px solid rgb(25,25,25)',
+  background: Theme.d,
+  // background: '-webkit-gradient(linear, left top, right top, color-stop(0.2, rgb(88,88,88)), color-stop(0.6, rgb(64,64,64)) )',
+  // border: '1px solid rgb(25,25,25)',
   // position: 'absolute',
   position: 'relative',
   borderRadius: '6px'

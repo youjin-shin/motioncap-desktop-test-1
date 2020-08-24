@@ -13,8 +13,7 @@ import { Canvas } from '../ui/canvas.js'
 
 const proxy_ctx = utils.proxy_ctx
 
-var
-  LINE_HEIGHT = LayoutConstants.LINE_HEIGHT
+var LINE_HEIGHT = LayoutConstants.LINE_HEIGHT
 var DIAMOND_SIZE = LayoutConstants.DIAMOND_SIZE
 var TIME_SCROLLER_HEIGHT = 35
 var MARKER_TRACK_HEIGHT = 25
@@ -56,11 +55,12 @@ time_scaled()
 // Timeline Panel
 /**************************/
 
-function TimelinePanel (data, dispatcher) {
+function TimelinePanel (controller, data, dispatcher) {
   var dpr = window.devicePixelRatio
   var track_canvas = document.createElement('canvas')
 
-  var scrollTop = 0; var scrollLeft = 0; var SCROLL_HEIGHT
+  var scrollTop = 0; var scrollLeft = 0
+  var SCROLL_HEIGHT
   var layers = data.get('layers').value
 
   this.scrollTo = function (s, y) {
@@ -71,9 +71,13 @@ function TimelinePanel (data, dispatcher) {
   this.resize = function () {
     var h = (LayoutConstants.height - TIME_SCROLLER_HEIGHT)
     dpr = window.devicePixelRatio
-    track_canvas.width = LayoutConstants.width * dpr
-    track_canvas.height = h * dpr
-    track_canvas.style.width = LayoutConstants.width + 'px'
+    // track_canvas.width = LayoutConstants.width * dpr
+
+    track_canvas.width = controller.getContainerWidth() * dpr - LayoutConstants.LEFT_PANE_WIDTH
+    // track_canvas.height = h * dpr
+    track_canvas.height = (LayoutConstants.height) * dpr
+    // track_canvas.style.width = LayoutConstants.width + 'px'
+    track_canvas.style.width = controller.getContainerWidth() - LayoutConstants.LEFT_PANE_WIDTH + 'px'
     track_canvas.style.height = h + 'px'
     SCROLL_HEIGHT = LayoutConstants.height - TIME_SCROLLER_HEIGHT
     scroll_canvas.setSize(LayoutConstants.width, TIME_SCROLLER_HEIGHT)
@@ -81,7 +85,7 @@ function TimelinePanel (data, dispatcher) {
 
   var div = document.createElement('div')
 
-  var scroll_canvas = new Canvas(LayoutConstants.width, TIME_SCROLLER_HEIGHT)
+  var scroll_canvas = new Canvas(controller.getContainerWidth(), TIME_SCROLLER_HEIGHT)
   // data.addListener('ui', repaint );
 
   utils.style(track_canvas, {
@@ -214,6 +218,7 @@ function TimelinePanel (data, dispatcher) {
 
   function drawLayerContents () {
     renderItems = []
+
     // horizontal Layer lines
     for (i = 0, il = layers.length; i <= il; i++) {
       ctx.strokeStyle = Theme.b
@@ -223,7 +228,7 @@ function TimelinePanel (data, dispatcher) {
 
       ctx_wrap
         .moveTo(0, y)
-        .lineTo(LayoutConstants.width, y)
+        .lineTo(controller.getContainerWidth(), y)
         .stroke()
     }
 
@@ -248,27 +253,27 @@ function TimelinePanel (data, dispatcher) {
         if (!frame.tween || frame.tween === 'none') continue
 
         var y1 = y + 2
-        var y2 = y + LINE_HEIGHT - 2
+        var y2 = y + LINE_HEIGHT
 
         renderItems.push(new EasingRect(x, y1, x2, y2, frame, frame2))
 
         // // draw easing graph
-        // var color = parseInt(frame._color.substring(1,7), 16);
-        // color = 0xffffff ^ color;
-        // color = color.toString(16);           // convert to hex
-        // color = '#' + ('000000' + color).slice(-6);
+        // var color = parseInt(frame._color.substring(1, 7), 16)
+        // color = 0xffffff ^ color
+        // color = color.toString(16) // convert to hex
+        // color = '#' + ('000000' + color).slice(-6)
 
-        // ctx.strokeStyle = color;
-        // var x3;
-        // ctx.beginPath();
-        // ctx.moveTo(x, y2);
-        // var dy = y1 - y2;
-        // var dx = x2 - x;
+        // ctx.strokeStyle = color
+        // var x3
+        // ctx.beginPath()
+        // ctx.moveTo(x, y2)
+        // var dy = y1 - y2
+        // var dx = x2 - x
 
-        // for (x3=x; x3 < x2; x3++) {
-        // 	ctx.lineTo(x3, y2 + Tweens[frame.tween]((x3 - x)/dx) * dy);
+        // for (x3 = x; x3 < x2; x3++) {
+        //   ctx.lineTo(x3, y2 + Tweens[frame.tween]((x3 - x) / dx) * dy)
         // }
-        // ctx.stroke();
+        // ctx.stroke()
       }
 
       for (j = 0; j < values.length; j++) {
@@ -339,7 +344,7 @@ function TimelinePanel (data, dispatcher) {
       .scale(dpr, dpr)
       .translate(0, MARKER_TRACK_HEIGHT)
       .beginPath()
-      .rect(0, 0, LayoutConstants.width, SCROLL_HEIGHT)
+      .rect(0, 0, controller.getContainerWidth(), SCROLL_HEIGHT)
       .translate(-scrollLeft, -scrollTop)
       .clip()
       .run(check)
@@ -371,7 +376,7 @@ function TimelinePanel (data, dispatcher) {
 
     ctx.lineWidth = 1 // .5, 1, 2
 
-    var width = LayoutConstants.width
+    var width = controller.getContainerWidth()
     var height = LayoutConstants.height
 
     var units = time_scale / tickMark1
@@ -437,7 +442,7 @@ function TimelinePanel (data, dispatcher) {
       .save()
       .translate(0, MARKER_TRACK_HEIGHT)
       .beginPath()
-      .rect(0, 0, LayoutConstants.width, SCROLL_HEIGHT)
+      .rect(0, 0, controller.getContainerWidth(), SCROLL_HEIGHT)
       .translate(-scrollLeft, -scrollTop)
       .clip()
       .run(drawLayerContents)

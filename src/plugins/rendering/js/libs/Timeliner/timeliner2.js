@@ -1,6 +1,3 @@
-/*
- * @author Joshua Koo http://joshuakoo.com
- */
 /* eslint-disable no-sequences */
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
@@ -44,6 +41,8 @@ function Timeliner (controller) {
   // Dispatcher for coordination
   var dispatcher = new Dispatcher()
 
+  console.log(controller)
+
   // Data
   var data = new DataStore()
   var layer_store = data.get('layers')
@@ -56,7 +55,7 @@ function Timeliner (controller) {
   var undo_manager = new UndoManager(dispatcher)
 
   // Views
-  var timeline = new TimelinePanel(data, dispatcher)
+  var timeline = new TimelinePanel(controller, data, dispatcher)
   var layer_panel = new LayerCabinet(data, dispatcher)
 
   setTimeout(function () {
@@ -263,8 +262,10 @@ function Timeliner (controller) {
     }
 
     if (needsResize) {
-      div.style.width = Settings.width + 'px'
-      div.style.height = Settings.height + 'px'
+      // div.style.width = Settings.width + 'px'
+      // div.style.height = Settings.height + 'px'
+      div.style.width = 100 + '%'
+      div.style.height = 100 + '%'
 
       restyle(layer_panel.dom, timeline.dom)
 
@@ -415,19 +416,21 @@ function Timeliner (controller) {
 	*/
 
   var div = document.createElement('div')
+  var container = controller.getContainer()
+
   style(div, {
     textAlign: 'left',
     lineHeight: '1em',
-    position: 'absolute',
-    top: '22px'
+    position: 'relative'
+    // top: '22px'
   })
 
   var pane = document.createElement('div')
 
   style(pane, {
-    position: 'fixed',
-    top: '20px',
-    left: '20px',
+    position: 'static',
+    top: '24px',
+    left: '24px',
     margin: 0,
     border: '1px solid ' + Theme.a,
     padding: 0,
@@ -440,10 +443,10 @@ function Timeliner (controller) {
   })
 
   var header_styles = {
-    position: 'absolute',
+    position: 'relative',
     top: '0px',
     width: '100%',
-    height: '22px',
+    height: '24px',
     lineHeight: '22px',
     overflow: 'hidden'
   }
@@ -486,11 +489,11 @@ function Timeliner (controller) {
   var pane_status = document.createElement('div')
 
   var footer_styles = {
-    position: 'absolute',
+    position: 'relative',
     width: '100%',
     height: '22px',
     lineHeight: '22px',
-    bottom: '0',
+    bottom: '44px',
     // padding: '2px',
     background: Theme.a,
     fontSize: '11px'
@@ -500,12 +503,12 @@ function Timeliner (controller) {
     borderTop: '1px solid ' + Theme.b
   })
 
+  pane.appendChild(pane_title)
   pane.appendChild(div)
   pane.appendChild(pane_status)
-  pane.appendChild(pane_title)
 
   var label_status = document.createElement('span')
-  label_status.textContent = 'hello!'
+  label_status.textContent = ''
   label_status.style.marginLeft = '10px'
 
   this.setStatus = function (text) {
@@ -521,6 +524,7 @@ function Timeliner (controller) {
 
   var bottom_right = document.createElement('div')
   style(bottom_right, footer_styles, {
+    bottom: '22px',
     textAlign: 'right'
   })
 
@@ -625,8 +629,9 @@ function Timeliner (controller) {
   // document.body.appendChild(iframe);
   // root = iframe.contentDocument.body;
 
-  root.appendChild(pane)
-  root.appendChild(ghostpane)
+  container.appendChild(pane)
+  // root.appendChild(pane)
+  // root.appendChild(ghostpane)
 
   div.appendChild(layer_panel.dom)
   div.appendChild(timeline.dom)
@@ -695,26 +700,27 @@ function Timeliner (controller) {
 
   var needsResize = true
 
-  function resize (width, height) {
+  function resize (newWidth, height) {
     // data.get('ui:bounds').value = {
     // 	width: width,
     // 	height: height
     // };
     // TODO: remove ugly hardcodes
-    width -= 4
+    newWidth -= 4
     height -= 44
 
-    Settings.width = width - Settings.LEFT_PANE_WIDTH
+    Settings.width = newWidth - Settings.LEFT_PANE_WIDTH
     Settings.height = height
 
     Settings.TIMELINE_SCROLL_HEIGHT = height - Settings.MARKER_TRACK_HEIGHT
-    var scrollable_height = Settings.TIMELINE_SCROLL_HEIGHT
 
+    var scrollable_height = Settings.TIMELINE_SCROLL_HEIGHT
     scrollbar.setHeight(scrollable_height - 2)
 
+    console.log(newWidth)
     style(scrollbar.dom, {
       top: Settings.MARKER_TRACK_HEIGHT + 'px',
-      left: (width - 16) + 'px'
+      left: (newWidth - 16 - 50) + 'px'
     })
 
     needsResize = true
