@@ -363,7 +363,7 @@ function LayerCabinet (data, dispatcher) {
     layer_store = state
     var layers = layer_store.value
     // layers = state;
-    console.log(layer_uis.length, layers)
+    // console.log(layer_uis.length, layers)
     var i, layer
     for (i = 0; i < layers.length; i++) {
       layer = layers[i]

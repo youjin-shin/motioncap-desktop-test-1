@@ -42,7 +42,7 @@ function LayerView (layer, dispatcher) {
   var height = (LayoutConstants.LINE_HEIGHT - 1)
 
   var keyframe_button = document.createElement('button')
-  keyframe_button.innerHTML = '&#9672;' // '&diams;' &#9671; 9679 9670 9672
+  keyframe_button.innerHTML = '&#9679;' // '&diams;' &#9671; 9679 9670 9672
   keyframe_button.style.cssText = 'background: none; font-size: 12px; padding: 0px; font-family: monospace; float: right; width: 20px; height: ' + height + 'px; border-style:none; outline: none;' //  border-style:inset;
 
   keyframe_button.addEventListener('click', function (e) {
@@ -97,7 +97,7 @@ function LayerView (layer, dispatcher) {
 
   // Solo
   var solo_toggle = new ToggleButton('S')
-  dom.appendChild(solo_toggle.dom)
+  // dom.appendChild(solo_toggle.dom)
 
   solo_toggle.onClick = function () {
     dispatcher.fire('action:solo', layer, solo_toggle.pressed)
@@ -105,7 +105,7 @@ function LayerView (layer, dispatcher) {
 
   // Mute
   var mute_toggle = new ToggleButton('M')
-  dom.appendChild(mute_toggle.dom)
+  // dom.appendChild(mute_toggle.dom)
 
   mute_toggle.onClick = function () {
     dispatcher.fire('action:mute', layer, mute_toggle.pressed)
@@ -114,12 +114,13 @@ function LayerView (layer, dispatcher) {
   var number = new UINumber(layer, dispatcher)
 
   number.onChange.do(function (value, done) {
-    state.get('_value').value = value
+    state.get('values').value = value
     dispatcher.fire('value.change', layer, value, done)
   })
 
   utils.style(number.dom, {
-    float: 'right'
+    float: 'right',
+    borderBottom: '1px solid ' + Theme.c
   })
 
   dom.appendChild(label)
@@ -133,7 +134,7 @@ function LayerView (layer, dispatcher) {
     borderBottom: '1px solid ' + Theme.b,
     top: 0,
     left: 0,
-    height: (LayoutConstants.LINE_HEIGHT - 1) + 'px',
+    height: (LayoutConstants.LINE_HEIGHT) + 'px',
     color: Theme.c
   })
 
@@ -146,7 +147,7 @@ function LayerView (layer, dispatcher) {
     layer = l
     state = s
 
-    var tmp_value = state.get('_value')
+    var tmp_value = state.get('values')
     if (tmp_value.value === undefined) {
       tmp_value.value = 0
     }
@@ -183,7 +184,8 @@ function LayerView (layer, dispatcher) {
       // keyframe_button.style.borderStyle = 'inset';
     }
 
-    state.get('_value').value = o.value
+    // console.log(state.get('values').value)
+    o.value = state.get('values').value
     number.setValue(o.value)
     number.paint()
 

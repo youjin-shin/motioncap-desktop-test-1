@@ -3293,6 +3293,13 @@ do.js@^1.0.0:
   resolved "https://registry.yarnpkg.com/do.js/-/do.js-1.0.0.tgz#2aae97f2d1a67f4d50324bd6f6595f4396a99ede"
   integrity sha1-Kq6X8tGmf01QMkvW9llfQ5apnt4=
 
+doc-ready@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/doc-ready/-/doc-ready-1.0.4.tgz#37f5391969cff994303fdfef2e5d50357f8164d3"
+  integrity sha1-N/U5GWnP+ZQwP9/vLl1QNX+BZNM=
+  dependencies:
+    eventie "^1"
+
 doctrine@1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/doctrine/-/doctrine-1.5.0.tgz#379dce730f6166f76cefa4e6707a159b02c5a6fa"
@@ -3466,6 +3473,13 @@ electron-devtools-installer@^3.1.0:
     rimraf "^3.0.2"
     semver "^7.2.1"
     unzip-crx "^0.2.0"
+
+electron-prompt@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/electron-prompt/-/electron-prompt-1.6.0.tgz#9ed8fa372c331c589f2cb5d3a6abf29d4965be31"
+  integrity sha512-CJaSo7o84JJygBGCHIY1zySn+j2ejsKZZFAmfIrOw8wgriufzl4RchTf9I2HNFvlOiekGj4WAznOaA6gFm5ddQ==
+  dependencies:
+    doc-ready "^1.0.4"
 
 electron-publish@22.7.0:
   version "22.7.0"
@@ -3891,6 +3905,11 @@ eventemitter3@^4.0.0:
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-4.0.4.tgz#b5463ace635a083d018bdc7c917b4c5f10a85384"
   integrity sha512-rlaVLnVxtxvoyLsQQFBx53YmXHDxRIzzTLbdfxqi4yocpSjAxXwkU0cScM5JgSKMqEhrZpnvQ2D9gjylR0AimQ==
+
+eventie@^1:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/eventie/-/eventie-1.0.6.tgz#d4ffc8b0c2b5e493c2aa1b22cbe918d3aee74437"
+  integrity sha1-1P/IsMK15JPCqhsiy+kY067nRDc=
 
 events@^3.0.0:
   version "3.1.0"

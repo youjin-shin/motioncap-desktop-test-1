@@ -16,6 +16,7 @@
     "@mdi/font": "^3.6.95",
     "core-js": "^3.6.5",
     "do.js": "^1.0.0",
+    "electron-prompt": "^1.6.0",
     "roboto-fontface": "*",
     "three": "^0.118.3",
     "vue": "^2.6.11",

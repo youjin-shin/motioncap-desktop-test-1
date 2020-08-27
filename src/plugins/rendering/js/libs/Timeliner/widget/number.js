@@ -91,7 +91,7 @@ function NumberUI (config) {
   }
 
   this.paint = function () {
-    if (value != null) span.value = value.toFixed(precision)
+    if (value != null) span.value = value
   }
 }
 

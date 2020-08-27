@@ -37,25 +37,22 @@ function LayerProp (name) {
 	*/
 }
 
-function Timeliner (controller) {
+function Timeliner (target) {
   // Dispatcher for coordination
   var dispatcher = new Dispatcher()
-
-  console.log(controller)
 
   // Data
   var data = new DataStore()
   var layer_store = data.get('layers')
-  console.log(layer_store)
   var layers = layer_store.value
 
-  //   window._data = data // expose it for debugging
+  window._data = data // expose it for debugging
 
   // Undo manager
   var undo_manager = new UndoManager(dispatcher)
 
   // Views
-  var timeline = new TimelinePanel(controller, data, dispatcher)
+  var timeline = new TimelinePanel(target, data, dispatcher)
   var layer_panel = new LayerCabinet(data, dispatcher)
 
   setTimeout(function () {
@@ -219,7 +216,7 @@ function Timeliner (controller) {
   }
 
   dispatcher.on('target.notify', function (name, value) {
-    if (controller) controller[name] = value
+    if (target) target[name] = value
   })
 
   dispatcher.on('update.scale', function (v) {
@@ -262,10 +259,8 @@ function Timeliner (controller) {
     }
 
     if (needsResize) {
-      // div.style.width = Settings.width + 'px'
-      // div.style.height = Settings.height + 'px'
-      div.style.width = 100 + '%'
-      div.style.height = 100 + '%'
+      div.style.width = Settings.width + 'px'
+      div.style.height = Settings.height + 'px'
 
       restyle(layer_panel.dom, timeline.dom)
 
@@ -416,21 +411,19 @@ function Timeliner (controller) {
 	*/
 
   var div = document.createElement('div')
-  var container = controller.getContainer()
-
   style(div, {
     textAlign: 'left',
     lineHeight: '1em',
-    position: 'relative'
-    // top: '22px'
+    position: 'absolute',
+    top: '22px'
   })
 
   var pane = document.createElement('div')
 
   style(pane, {
-    position: 'static',
-    top: '24px',
-    left: '24px',
+    position: 'fixed',
+    top: '20px',
+    left: '20px',
     margin: 0,
     border: '1px solid ' + Theme.a,
     padding: 0,
@@ -443,10 +436,10 @@ function Timeliner (controller) {
   })
 
   var header_styles = {
-    position: 'relative',
+    position: 'absolute',
     top: '0px',
     width: '100%',
-    height: '24px',
+    height: '22px',
     lineHeight: '22px',
     overflow: 'hidden'
   }
@@ -467,8 +460,8 @@ function Timeliner (controller) {
   var title_bar = document.createElement('span')
   pane_title.appendChild(title_bar)
 
-  //   title_bar.innerHTML = 'Timeliner ' + TIMELINER_VERSION
-  //   pane_title.appendChild(title_bar)
+  title_bar.innerHTML = 'Timeliner ' + TIMELINER_VERSION
+  pane_title.appendChild(title_bar)
 
   var top_right_bar = document.createElement('div')
   style(top_right_bar, header_styles, {
@@ -489,11 +482,11 @@ function Timeliner (controller) {
   var pane_status = document.createElement('div')
 
   var footer_styles = {
-    position: 'relative',
+    position: 'absolute',
     width: '100%',
     height: '22px',
     lineHeight: '22px',
-    bottom: '44px',
+    bottom: '0',
     // padding: '2px',
     background: Theme.a,
     fontSize: '11px'
@@ -503,12 +496,12 @@ function Timeliner (controller) {
     borderTop: '1px solid ' + Theme.b
   })
 
-  pane.appendChild(pane_title)
   pane.appendChild(div)
   pane.appendChild(pane_status)
+  pane.appendChild(pane_title)
 
   var label_status = document.createElement('span')
-  label_status.textContent = ''
+  label_status.textContent = 'hello!'
   label_status.style.marginLeft = '10px'
 
   this.setStatus = function (text) {
@@ -524,7 +517,6 @@ function Timeliner (controller) {
 
   var bottom_right = document.createElement('div')
   style(bottom_right, footer_styles, {
-    bottom: '22px',
     textAlign: 'right'
   })
 
@@ -629,9 +621,8 @@ function Timeliner (controller) {
   // document.body.appendChild(iframe);
   // root = iframe.contentDocument.body;
 
-  container.appendChild(pane)
-  // root.appendChild(pane)
-  // root.appendChild(ghostpane)
+  root.appendChild(pane)
+  root.appendChild(ghostpane)
 
   div.appendChild(layer_panel.dom)
   div.appendChild(timeline.dom)
@@ -700,27 +691,26 @@ function Timeliner (controller) {
 
   var needsResize = true
 
-  function resize (newWidth, height) {
+  function resize (width, height) {
     // data.get('ui:bounds').value = {
     // 	width: width,
     // 	height: height
     // };
     // TODO: remove ugly hardcodes
-    newWidth -= 4
+    width -= 4
     height -= 44
 
-    Settings.width = newWidth - Settings.LEFT_PANE_WIDTH
+    Settings.width = width - Settings.LEFT_PANE_WIDTH
     Settings.height = height
 
     Settings.TIMELINE_SCROLL_HEIGHT = height - Settings.MARKER_TRACK_HEIGHT
-
     var scrollable_height = Settings.TIMELINE_SCROLL_HEIGHT
+
     scrollbar.setHeight(scrollable_height - 2)
 
-    console.log(newWidth)
     style(scrollbar.dom, {
       top: Settings.MARKER_TRACK_HEIGHT + 'px',
-      left: (newWidth - 16 - 50) + 'px'
+      left: (width - 16) + 'px'
     })
 
     needsResize = true
@@ -758,7 +748,7 @@ function Timeliner (controller) {
   }
 
   this.setTarget = function (t) {
-    controller = t
+    target = t
   }
 
   function getValueRanges (ranges, interval) {

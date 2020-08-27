@@ -125,12 +125,13 @@ function UINumber (config) {
   // public
   this.setValue = function (v) {
     value = v
-    span.value = value.toFixed(precision)
+    // console.log(value)
+    span.value = value
   }
 
   this.paint = function () {
     if (value && document.activeElement !== span) {
-      span.value = value.toFixed(precision)
+      span.value = value
     }
   }
 }

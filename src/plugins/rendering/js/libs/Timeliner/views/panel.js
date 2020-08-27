@@ -19,6 +19,7 @@ var TIME_SCROLLER_HEIGHT = 35
 var MARKER_TRACK_HEIGHT = 25
 var LEFT_PANE_WIDTH = LayoutConstants.LEFT_PANE_WIDTH
 var time_scale = LayoutConstants.time_scale
+// var SCROLL_HEIGHT = LayoutConstants.SCROLL_HEIGHT
 var TOP = 10
 
 var frame_start = 0 // this is the current scroll position.
@@ -61,6 +62,7 @@ function TimelinePanel (controller, data, dispatcher) {
 
   var scrollTop = 0; var scrollLeft = 0
   var SCROLL_HEIGHT
+
   var layers = data.get('layers').value
 
   this.scrollTo = function (s, y) {
@@ -80,7 +82,7 @@ function TimelinePanel (controller, data, dispatcher) {
     track_canvas.style.width = controller.getContainerWidth() - LayoutConstants.LEFT_PANE_WIDTH + 'px'
     track_canvas.style.height = h + 'px'
     SCROLL_HEIGHT = LayoutConstants.height - TIME_SCROLLER_HEIGHT
-    scroll_canvas.setSize(LayoutConstants.width, TIME_SCROLLER_HEIGHT)
+    scroll_canvas.setSize(controller.getContainerWidth(), TIME_SCROLLER_HEIGHT)
   }
 
   var div = document.createElement('div')
@@ -90,6 +92,7 @@ function TimelinePanel (controller, data, dispatcher) {
 
   utils.style(track_canvas, {
     position: 'absolute',
+    // top: 22 + 'px',
     top: TIME_SCROLLER_HEIGHT + 'px',
     left: '0px'
   })
@@ -252,8 +255,8 @@ function TimelinePanel (controller, data, dispatcher) {
 
         if (!frame.tween || frame.tween === 'none') continue
 
-        var y1 = y + 2
-        var y2 = y + LINE_HEIGHT
+        var y1 = y + LINE_HEIGHT / 3
+        var y2 = y + LINE_HEIGHT / 1.5
 
         renderItems.push(new EasingRect(x, y1, x2, y2, frame, frame2))
 
@@ -520,11 +523,12 @@ function TimelinePanel (controller, data, dispatcher) {
 
   track_canvas.addEventListener('dblclick', function (e) {
     canvasBounds = track_canvas.getBoundingClientRect()
+
     var mx = e.clientX - canvasBounds.left; var my = e.clientY - canvasBounds.top
 
     var track = y_to_track(my)
     var s = x_to_time(mx)
-
+    console.log(layers[track])
     dispatcher.fire('keyframe', layers[track], currentTime)
   })
 

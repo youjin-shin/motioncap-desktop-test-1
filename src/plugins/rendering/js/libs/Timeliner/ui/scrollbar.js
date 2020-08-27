@@ -136,6 +136,7 @@ function ScrollBar (h, w, dispatcher) {
 
   scrolltrack.addEventListener('mousedown', onDown, false)
   this.dom = scrolltrack
+  this.dom.id = 'track-scroller'
 }
 
 export { ScrollBar }

@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable no-redeclare */
 /* eslint-disable no-undef */
 /* eslint-disable no-tabs */
@@ -9,6 +10,7 @@ import {
   PropertyBinding
 // } from '../../../../../node_modules/three/build/three.module.js'
 } from '../../build/three.module'
+import { DataStore } from '../../js/libs/Timeliner/utils/util_datastore'
 
 // var TimelinerController = function TimelinerController (scene, trackInfo, onUpdate, container) {
 //   this._scene = scene
@@ -28,6 +30,9 @@ import {
 
 class TimelinerController {
   constructor (scene, trackInfo, onUpdate, container) {
+    this.data = undefined
+    this.layer_store = undefined
+
     this._scene = scene
     this._trackInfo = trackInfo
     this._container = container
@@ -41,21 +46,25 @@ class TimelinerController {
     this._tracks = []
     this._propRefs = {}
     this._channelNames = []
-
-    this.init()
   }
 
   init () {
     console.log('called')
+
+    this.data = new DataStore()
+    this.layer_store = this.data.get('layers')
+
     var tracks = []
     var trackInfo = this._trackInfo
 
     for (var i = 0, n = trackInfo.length; i !== n; ++i) {
       var spec = trackInfo[i]
-
       tracks.push(this._addTrack(spec.type, spec.propertyPath, spec.initialValue, spec.interpolation))
     }
-    this._tracks = tracks
+
+    this.layer_store.value = tracks
+
+    console.log(this._tracks)
     this._clip = new AnimationClip('editclip', 0, tracks)
     // console.log(this._clip)
     this._action = this._mixer.clipAction(this._clip).play()

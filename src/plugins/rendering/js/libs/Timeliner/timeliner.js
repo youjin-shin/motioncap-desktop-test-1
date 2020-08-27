@@ -1,22 +1,23 @@
+/* eslint-disable no-sequences */
+/* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 /* eslint-disable camelcase */
 /* eslint-disable no-tabs */
-import undo from './undo.js'
-import { Dispatcher } from './dispatcher.js'
+import { UndoManager, UndoState } from './utils/util_undo.js'
+import { Dispatcher } from './utils/util_dispatcher.js'
 import { Theme } from './theme.js'
-import { LayoutConstants } from './layout_constants.js'
-import { utils } from './utils.js'
-import { LayerCabinet } from './layer_cabinet.js'
+import { LayoutConstants as Settings } from './layout_constants.js'
+import { utils } from './utils/utils.js'
+import { LayerCabinet } from './views/layer_cabinet.js'
+import { TimelinePanel } from './views/panel.js'
+import { IconButton } from './ui/icon_button.js'
+import { ScrollBar } from './ui/scrollbar.js'
+import { DataStore } from './utils/util_datastore.js'
+import { DockingWindow } from './utils/docking_window.js'
+const { dialog } = window.require('electron').remote
+const prompt = window.require('electron-prompt')
 
-import { DopeSheetPanel } from './dopesheet_panel.js'
-import { CurvePanel } from './curve_panel.js'
-
-import { IconButton } from './widget/icon_button.js'
-
-import { ScrollBar } from './widget/scrollbar.js'
-
-var UndoManager = undo.UndoManager
-var UndoState = undo.UndoState
+const TIMELINER_VERSION = '2.0.0-dev'
 var style = utils.style
 var saveToFile = utils.saveToFile
 var openAs = utils.openAs
@@ -28,6 +29,8 @@ function LayerProp (name) {
   this.name = name
   this.values = []
 
+  this._value = 0
+
   this._color = '#' + (Math.random() * 0xffffff | 0).toString(16)
   /*
 	this.max
@@ -37,87 +40,123 @@ function LayerProp (name) {
 }
 
 function Timeliner (controller) {
+  // Dispatcher for coordination
   var dispatcher = new Dispatcher()
+  controller.init()
+  // Data
+  var data = controller.data
+  var layer_store = controller.layer_store
+  console.log(layer_store)
+  var layers = layer_store.value
 
-  controller.timeliner = this
-  controller.init(this)
+  //   window._data = data // expose it for debugging
 
-  var context = {
-
-    width: controller.getContainerWidth(),
-    height: LayoutConstants.HEIGHT,
-    // height: controller.getContainerHeight(),
-
-    scrollHeight: 0,
-
-    totalTime: 20.0,
-    timeScale: 60,
-
-    currentTime: 0.0,
-    scrollTime: 0.0,
-
-    dispatcher: dispatcher,
-
-    controller: controller
-
-  }
-  var currentEditor
-  var curveEditor = new CurvePanel(context)
-  var dopeSheetEditor = new DopeSheetPanel(context)
-  currentEditor = dopeSheetEditor
-
-  var layer_panel = new LayerCabinet(context)
-
+  // Undo manager
   var undo_manager = new UndoManager(dispatcher)
 
-  var scrollbar = new ScrollBar(0, 10)
+  // Views
+  var timeline = new TimelinePanel(controller, data, dispatcher)
+  var layer_panel = new LayerCabinet(data, dispatcher)
 
-  var div = document.createElement('div')
-  var container = controller.getContainer()
+  // addRenderedLayer()
 
-  controller.setDuration(context.totalTime)
+  setTimeout(function () {
+    // hack!
+    undo_manager.save(new UndoState(data, 'Loaded'), true)
+  })
 
-  /*
-	setTimeout(function() {
-		// hack!
-		undo_manager.save(new UndoState(data, 'Loaded'), true);
-	});
-*/
-  dispatcher.on('keyframe', function (channelName) {
-    var time = context.currentTime
+  dispatcher.on('keyframe', function (layer, value) {
+    var index = layers.indexOf(layer)
 
-    if (time == null || channelName == null) return
+    var t = data.get('ui:currentTime').value
+    var v = utils.findTimeinLayer(layer, t)
 
-    var keyTimes = controller.getChannelKeyTimes(channelName, time)
+    // console.log(v, '...keyframe index', index, utils.format_friendly_seconds(t), typeof(v));
+    // console.log('layer', layer, value);
 
-    if (utils.binarySearch(keyTimes, time) < 0) {
-      controller.setKeyframe(channelName, time)
+    if (typeof (v) === 'number') {
+      layer.values.splice(v, 0, {
+        time: t,
+        value: value,
+        _color: '#' + (Math.random() * 0xffffff | 0).toString(16)
+      })
 
-      //			undo_manager.save(new UndoState(data, 'Add Keyframe'));
+      undo_manager.save(new UndoState(data, 'Add Keyframe'))
     } else {
-      controller.delKeyframe(channelName, time)
+      console.log('remove from index', v)
+      layer.values.splice(v.index, 1)
 
-      //			undo_manager.save(new UndoState(data, 'Remove Keyframe'));
+      undo_manager.save(new UndoState(data, 'Remove Keyframe'))
     }
 
-    repaintAll() // TODO repaint one channel would be enough
+    repaintAll()
   })
 
   dispatcher.on('keyframe.move', function (layer, value) {
-    //		undo_manager.save(new UndoState(data, 'Move Keyframe'));
+    undo_manager.save(new UndoState(data, 'Move Keyframe'))
+  })
+
+  // dispatcher.fire('value.change', layer, me.value);
+  dispatcher.on('value.change', function (layer, value, dont_save) {
+    if (layer._mute) return
+
+    var t = data.get('ui:currentTime').value
+    var v = utils.findTimeinLayer(layer, t)
+
+    // console.log(v, 'value.change', layer, value, utils.format_friendly_seconds(t), typeof(v));
+    if (typeof (v) === 'number') {
+      layer.values.splice(v, 0, {
+        time: t,
+        value: value,
+        _color: '#' + (Math.random() * 0xffffff | 0).toString(16)
+      })
+      if (!dont_save) undo_manager.save(new UndoState(data, 'Add value'))
+    } else {
+      v.object.value = value
+      if (!dont_save) undo_manager.save(new UndoState(data, 'Update value'))
+    }
+
+    repaintAll()
+  })
+
+  dispatcher.on('action:solo', function (layer, solo) {
+    layer._solo = solo
+
+    console.log(layer, solo)
+
+    // When a track is solo-ed, playback only changes values
+    // of that layer.
+  })
+
+  dispatcher.on('action:mute', function (layer, mute) {
+    layer._mute = mute
+
+    // When a track is mute, playback does not play
+    // frames of those muted layers.
+
+    // also feels like hidden feature in photoshop
+
+    // when values are updated, eg. from slider,
+    // no tweens will be created.
+    // we can decide also to "lock in" layers
+    // no changes to tween will be made etc.
+  })
+
+  dispatcher.on('ease', function (layer, ease_type) {
+    var t = data.get('ui:currentTime').value
+    var v = utils.timeAtLayer(layer, t)
+    // console.log('Ease Change > ', layer, value, v);
+    if (v && v.entry) {
+      v.entry.tween = ease_type
+    }
+
+    undo_manager.save(new UndoState(data, 'Add Ease'))
+
+    repaintAll()
   })
 
   var start_play = null
   var played_from = 0 // requires some more tweaking
-
-  var setCurrentTime = function setCurrentTime (value) {
-    var time = Math.min(Math.max(value, 0), context.totalTime)
-    context.currentTime = time
-    controller.setDisplayTime(time)
-
-    if (start_play) start_play = performance.now() - value * 1000
-    repaintAll()
-  }
 
   dispatcher.on('controls.toggle_play', function () {
     if (start_play) {
@@ -140,7 +179,7 @@ function Timeliner (controller) {
 
   function startPlaying () {
     // played_from = timeline.current_frame;
-    start_play = performance.now() - context.currentTime * 1000
+    start_play = performance.now() - data.get('ui:currentTime').value * 1000
     layer_panel.setControlStatus(true)
     // dispatcher.fire('controls.status', true);
   }
@@ -156,59 +195,61 @@ function Timeliner (controller) {
     setCurrentTime(0)
   })
 
+  var currentTimeStore = data.get('ui:currentTime')
   dispatcher.on('time.update', setCurrentTime)
 
   dispatcher.on('totalTime.update', function (value) {
-    context.totalTime = value
-    controller.setDuration(value)
-    currentEditor.repaint()
+    // context.totalTime = value;
+    // controller.setDuration(value);
+    // timeline.repaint();
+  })
+
+  /* update scroll viewport */
+  dispatcher.on('update.scrollTime', function (v) {
+    v = Math.max(0, v)
+    data.get('ui:scrollTime').value = v
+    repaintAll()
+  })
+
+  function setCurrentTime (value) {
+    value = Math.max(0, value)
+    currentTimeStore.value = value
+
+    if (start_play) start_play = performance.now() - value * 1000
+    repaintAll()
+    // layer_panel.repaint(s);
+  }
+
+  dispatcher.on('target.notify', function (name, value) {
+    if (controller) controller[name] = value
   })
 
   dispatcher.on('update.scale', function (v) {
-    context.timeScale = v
-    currentEditor.setTimeScale(v)
-    currentEditor.repaint()
+    console.log('range', v)
+    data.get('ui:timeScale').value = v
+
+    timeline.repaint()
   })
 
   // handle undo / redo
   dispatcher.on('controls.undo', function () {
-    /*
-		var history = undo_manager.undo();
-		data.setJSONString(history.state);
+    var history = undo_manager.undo()
+    data.setJSONString(history.state)
 
-		updateState();
-*/
+    updateState()
   })
 
   dispatcher.on('controls.redo', function () {
-    /*
-		var history = undo_manager.redo();
-		data.setJSONString(history.state);
+    var history = undo_manager.redo()
+    data.setJSONString(history.state)
 
-		updateState();
-*/
-  })
-
-  dispatcher.on('controls.curveEditor', function () {
-    currentEditor = curveEditor
-    console.log(currentEditor)
-    // currentEditor.repaint()
-
-    repaintAll()
-  })
-  dispatcher.on('controls.dopesheetEditor', function () {
-    currentEditor = dopeSheetEditor
-    console.log(currentEditor)
-    // currentEditor.repaint()
-
-    repaintAll()
+    updateState()
   })
 
   /*
 		Paint Routines
 	*/
 
-  var needsResize = true
   function paint () {
     requestAnimationFrame(paint)
 
@@ -216,27 +257,28 @@ function Timeliner (controller) {
       var t = (performance.now() - start_play) / 1000
       setCurrentTime(t)
 
-      if (t > context.totalTime) {
+      if (t > data.get('ui:totalTime').value) {
         // simple loop
         start_play = performance.now()
       }
     }
 
     if (needsResize) {
+      // div.style.width = Settings.width + 'px'
+      // div.style.height = Settings.height + 'px'
       div.style.width = 100 + '%'
-      // console.log(container.clientHeight)
       div.style.height = 100 + '%'
 
-      restyle(layer_panel.dom, currentEditor.dom)
+      restyle(layer_panel.dom, timeline.dom)
 
-      currentEditor.resize()
+      timeline.resize()
       repaintAll()
       needsResize = false
 
       dispatcher.fire('resize')
     }
 
-    currentEditor._paint()
+    timeline._paint()
   }
 
   paint()
@@ -246,31 +288,29 @@ function Timeliner (controller) {
 	*/
 
   function save (name) {
-    /*
-		if (!name) name = 'autosave';
+    if (!name) name = 'autosave'
 
-		var json = data.getJSONString();
+    var json = data.getJSONString()
 
-		try {
-			localStorage[STORAGE_PREFIX + name] = json;
-			dispatcher.fire('save:done');
-		} catch (e) {
-			console.log('Cannot save', name, json);
-		}
-*/
+    try {
+      localStorage[STORAGE_PREFIX + name] = json
+      dispatcher.fire('save:done')
+    } catch (e) {
+      console.log('Cannot save', name, json)
+    }
   }
 
   function saveAs (name) {
-    if (!name) name = context.name
+    if (!name) name = data.get('name').value
     name = prompt('Pick a name to save to (localStorage)', name)
     if (name) {
-      context.name = name
+      data.data.name = name
       save(name)
     }
   }
 
   function saveSimply () {
-    var name = context.name
+    var name = data.get('name').value
     if (name) {
       save(name)
     } else {
@@ -279,27 +319,17 @@ function Timeliner (controller) {
   }
 
   function exportJSON () {
-    var structs = controller.serialize()
-    //		var ret = prompt('Hit OK to download otherwise Copy and Paste JSON');
-    //		if (!ret) {
-    //			console.log(JSON.stringify(structs, null, '\t'));
-    //			return;
-    //		}
+    var json = data.getJSONString()
+    var ret = prompt('Hit OK to download otherwise Copy and Paste JSON', json)
 
-    var fileName = 'animation.json'
+    console.log(JSON.stringify(data.data, null, '\t'))
+    if (!ret) return
 
-    saveToFile(JSON.stringify(structs, null, '\t'), fileName)
-  }
+    // make json downloadable
+    json = data.getJSONString('\t')
+    var fileName = 'timeliner-test' + '.json'
 
-  function load (structs) {
-    controller.deserialize(structs)
-
-    // TODO reset context
-
-    //		undo_manager.clear();
-    //		undo_manager.save(new UndoState(data, 'Loaded'), true);
-
-    updateState()
+    saveToFile(json, fileName)
   }
 
   function loadJSONString (o) {
@@ -308,26 +338,45 @@ function Timeliner (controller) {
     load(json)
   }
 
+  function load (o) {
+    data.setJSON(o)
+    console.log(o)
+    //
+    if (data.getValue('ui') === undefined) {
+      data.setValue('ui', {
+        currentTime: 0,
+        totalTime: Settings.default_length,
+        scrollTime: 0,
+        timeScale: Settings.time_scale
+      })
+    }
+
+    undo_manager.clear()
+    undo_manager.save(new UndoState(data, 'Loaded'), true)
+
+    updateState()
+  }
+
   function updateState () {
-    layer_panel.updateState()
-    currentEditor.updateState()
+    layers = layer_store.value // FIXME: support Arrays
+    layer_panel.setState(layer_store)
+    timeline.setState(layer_store)
 
     repaintAll()
   }
 
   function repaintAll () {
-    var layers = context.controller.getChannelNames()
-    var content_height = layers.length * LayoutConstants.LINE_HEIGHT
-    scrollbar.setLength(context.scrollHeight / content_height)
+    var content_height = layers.length * Settings.LINE_HEIGHT
+    scrollbar.setLength(Settings.TIMELINE_SCROLL_HEIGHT / content_height)
 
     layer_panel.repaint()
-    currentEditor.repaint()
+    timeline.repaint()
   }
 
   function promptImport () {
     var json = prompt('Paste JSON in here to Load')
     if (!json) return
-    // console.log('Loading.. ', json);
+    console.log('Loading.. ', json)
     loadJSONString(json)
   }
 
@@ -343,10 +392,10 @@ function Timeliner (controller) {
     promptImport()
   })
 
-  // dispatcher.on('new', function () {
-  //   data.blank()
-  //   updateState()
-  // })
+  dispatcher.on('new', function () {
+    data.blank()
+    updateState()
+  })
 
   dispatcher.on('openfile', function () {
     openAs(function (data) {
@@ -369,11 +418,14 @@ function Timeliner (controller) {
 		Start DOM Stuff (should separate file)
 	*/
 
+  var div = document.createElement('div')
+  var container = controller.getContainer()
+
   style(div, {
     textAlign: 'left',
     lineHeight: '1em',
     position: 'relative'
-    // top: '24px'
+    // top: '22px'
   })
 
   var pane = document.createElement('div')
@@ -389,13 +441,13 @@ function Timeliner (controller) {
     backgroundColor: Theme.a,
     color: Theme.d,
     zIndex: Z_INDEX,
-    fontSize: '16px'
-
+    fontFamily: 'monospace',
+    fontSize: '12px'
   })
 
   var header_styles = {
     position: 'relative',
-    top: '0',
+    top: '0px',
     width: '100%',
     height: '24px',
     lineHeight: '22px',
@@ -418,21 +470,22 @@ function Timeliner (controller) {
   var title_bar = document.createElement('span')
   pane_title.appendChild(title_bar)
 
+  //   title_bar.innerHTML = 'Timeliner ' + TIMELINER_VERSION
+  //   pane_title.appendChild(title_bar)
+
   var top_right_bar = document.createElement('div')
   style(top_right_bar, header_styles, {
-
     textAlign: 'right'
   })
 
   pane_title.appendChild(top_right_bar)
 
   // resize minimize
-  var resize_small = new IconButton(10, 'resize_small', 'minimize', dispatcher)
-  style(resize_small.dom, button_styles, { marginRight: '2px' })
-  top_right_bar.appendChild(resize_small.dom)
+  // var resize_small = new IconButton(10, 'resize_small', 'minimize', dispatcher);
+  // top_right_bar.appendChild(resize_small.dom);
 
   // resize full
-  var resize_full = new IconButton(10, 'resize_full', 'Maximize', dispatcher)
+  var resize_full = new IconButton(10, 'resize_full', 'maximize', dispatcher)
   style(resize_full.dom, button_styles, { marginRight: '2px' })
   top_right_bar.appendChild(resize_full.dom)
 
@@ -443,14 +496,14 @@ function Timeliner (controller) {
     width: '100%',
     height: '22px',
     lineHeight: '22px',
-    bottom: '0',
+    bottom: '44px',
     // padding: '2px',
+    background: Theme.a,
     fontSize: '11px'
   }
 
   style(pane_status, footer_styles, {
-    borderTop: '1px solid ' + Theme.b,
-    background: Theme.a
+    borderTop: '1px solid ' + Theme.b
   })
 
   pane.appendChild(pane_title)
@@ -461,14 +514,16 @@ function Timeliner (controller) {
   label_status.textContent = ''
   label_status.style.marginLeft = '10px'
 
-  dispatcher.on('status', function (text) {
+  this.setStatus = function (text) {
     label_status.textContent = text
-  })
+  }
 
   dispatcher.on('state:save', function (description) {
     dispatcher.fire('status', description)
     save('autosave')
   })
+
+  dispatcher.on('status', this.setStatus)
 
   var bottom_right = document.createElement('div')
   style(bottom_right, footer_styles, {
@@ -476,30 +531,31 @@ function Timeliner (controller) {
     textAlign: 'right'
   })
 
-  // var button_save = document.createElement('button')
-  // style(button_save, button_styles)
-  // button_save.textContent = 'Save'
-  // button_save.onclick = function () {
-  //   save()
-  // }
+  // var button_save = document.createElement('button');
+  // style(button_save, button_styles);
+  // button_save.textContent = 'Save';
+  // button_save.onclick = function() {
+  // 	save();
+  // };
 
-  // var button_load = document.createElement('button')
-  // style(button_load, button_styles)
-  // button_load.textContent = 'Import'
-  // button_load.onclick = this.promptLoad
+  // var button_load = document.createElement('button');
+  // style(button_load, button_styles);
+  // button_load.textContent = 'Import';
+  // button_load.onclick = this.promptLoad;
 
-  // var button_open = document.createElement('button')
-  // style(button_open, button_styles)
-  // button_open.textContent = 'Open'
-  // button_open.onclick = this.promptOpen
+  // var button_open = document.createElement('button');
+  // style(button_open, button_styles);
+  // button_open.textContent = 'Open';
+  // button_open.onclick = this.promptOpen;
 
-  // bottom_right.appendChild(button_load)
-  // bottom_right.appendChild(button_save)
-  // bottom_right.appendChild(button_open)
+  // bottom_right.appendChild(button_load);
+  // bottom_right.appendChild(button_save);
+  // bottom_right.appendChild(button_open);
 
   pane_status.appendChild(label_status)
   pane_status.appendChild(bottom_right)
 
+  /**/
   // zoom in
   var zoom_in = new IconButton(12, 'zoom_in', 'zoom in', dispatcher)
   // zoom out
@@ -507,39 +563,53 @@ function Timeliner (controller) {
   // settings
   var cog = new IconButton(12, 'cog', 'settings', dispatcher)
 
-  bottom_right.appendChild(zoom_in.dom)
-  bottom_right.appendChild(zoom_out.dom)
-  bottom_right.appendChild(cog.dom)
+  // bottom_right.appendChild(zoom_in.dom);
+  // bottom_right.appendChild(zoom_out.dom);
+  // bottom_right.appendChild(cog.dom);
 
-  // // add layer
-  // var plus = new IconButton(12, 'plus', 'New Layer', dispatcher)
-  // plus.onClick(function () {
-  //   // var name = prompt('Layer name?')
-  //   var name = 'test'
-  //   addLayer(name)
+  // add layer
+  var plus = new IconButton(12, 'plus', 'New Layer', dispatcher)
+  plus.onClick(function () {
+    prompt({
+      title: 'New Layer',
+      label: 'create new layer',
+      value: 'Layer Name',
+      inputAttrs: {
+        type: 'text'
+      },
+      type: 'input'
+    })
+      .then((r) => {
+        if (r === null) {
+          console.log('Nothing')
+        } else {
+          var name = r
+          addLayer(name)
+          undo_manager.save(new UndoState(data, 'Layer added'))
+        }
+      })
+      .catch(console.error)
 
-  //   // undo_manager.save(new UndoState(data, 'Layer added'));
+    repaintAll()
+  })
+  style(plus.dom, button_styles)
+  bottom_right.appendChild(plus.dom)
 
-  //   repaintAll()
-  // })
-  // style(plus.dom, button_styles)
-  // bottom_right.appendChild(plus.dom)
-
-  // // trash
-  // var trash = new IconButton(12, 'trash', 'Delete save', dispatcher)
-  // trash.onClick(function () {
-  //   var name = data.get('name').value
-  //   if (name && localStorage[STORAGE_PREFIX + name]) {
-  //     var ok = confirm('Are you sure you wish to delete ' + name + '?')
-  //     if (ok) {
-  //       delete localStorage[STORAGE_PREFIX + name]
-  //       dispatcher.fire('status', name + ' deleted')
-  //       dispatcher.fire('save:done')
-  //     }
-  //   }
-  // })
-  // style(trash.dom, button_styles, { marginRight: '2px' })
-  // bottom_right.appendChild(trash.dom)
+  // trash
+  var trash = new IconButton(12, 'trash', 'Delete save', dispatcher)
+  trash.onClick(function () {
+    var name = data.get('name').value
+    if (name && localStorage[STORAGE_PREFIX + name]) {
+      var ok = confirm('Are you sure you wish to delete ' + name + '?')
+      if (ok) {
+        delete localStorage[STORAGE_PREFIX + name]
+        dispatcher.fire('status', name + ' deleted')
+        dispatcher.fire('save:done')
+      }
+    }
+  })
+  style(trash.dom, button_styles, { marginRight: '2px' })
+  bottom_right.appendChild(trash.dom)
 
   // pane_status.appendChild(document.createTextNode(' | TODO <Dock Full | Dock Botton | Snap Window Edges | zoom in | zoom out | Settings | help>'));
 
@@ -548,7 +618,7 @@ function Timeliner (controller) {
 	*/
 
   var ghostpane = document.createElement('div')
-  // ghostpane.id = 'ghostpane';
+  ghostpane.id = 'ghostpane'
   style(ghostpane, {
     background: '#999',
     opacity: 0.2,
@@ -562,14 +632,29 @@ function Timeliner (controller) {
     transitionTimingFunction: 'ease-in-out'
   })
 
+  //
+  // Handle DOM Views
+  //
+
+  // Shadow Root
+  var root = document.createElement('timeliner')
+  document.body.appendChild(root)
+  if (root.createShadowRoot) root = root.createShadowRoot()
+
+  window.r = root
+
+  // var iframe = document.createElement('iframe');
+  // document.body.appendChild(iframe);
+  // root = iframe.contentDocument.body;
+
   container.appendChild(pane)
-  // document.body.appendChild(pane)
-  // document.body.appendChild(ghostpane)
-  // container.appendChild(ghostpane)
+  // root.appendChild(pane)
+  // root.appendChild(ghostpane)
 
   div.appendChild(layer_panel.dom)
-  div.appendChild(currentEditor.dom)
+  div.appendChild(timeline.dom)
 
+  var scrollbar = new ScrollBar(200, 10)
   div.appendChild(scrollbar.dom)
 
   // percentages
@@ -577,18 +662,18 @@ function Timeliner (controller) {
     switch (type) {
       case 'scrollto':
         layer_panel.scrollTo(scrollTo)
-        currentEditor.scrollTo(scrollTo)
+        timeline.scrollTo(scrollTo)
         break
-      // case 'pageup':
-      //   scrollTop -= pageOffset
-      //   me.draw()
-      //   me.updateScrollbar()
-      //   break
-      // case 'pagedown':
-      //   scrollTop += pageOffset
-      //   me.draw()
-      //   me.updateScrollbar()
-      //   break
+	//		case 'pageup':
+	// 			scrollTop -= pageOffset;
+	// 			me.draw();
+	// 			me.updateScrollbar();
+	// 			break;
+	// 		case 'pagedown':
+	// 			scrollTop += pageOffset;
+	// 			me.draw();
+	// 			me.updateScrollbar();
+	// 			break;
     }
   })
 
@@ -613,9 +698,9 @@ function Timeliner (controller) {
     var undo = e.metaKey && e.keyCode === 91 && !e.shiftKey
 
     var active = document.activeElement
-    // console.log(active.nodeName)
+    // console.log( active.nodeName );
 
-    if (active.nodeName.match(/(INPUT|BUTTON|SELECT)/)) {
+    if (active.nodeName.match(/(INPUT|BUTTON|SELECT|TIMELINER)/)) {
       active.blur()
     }
 
@@ -628,445 +713,129 @@ function Timeliner (controller) {
     } else if (e.keyCode === 27) {
       // Esc = stop. FIXME: should rewind head to last played from or Last pointed from?
       dispatcher.fire('controls.pause')
-    }
-    // else console.log(e.keyCode);
+    } else console.log('keydown', e.keyCode)
   })
 
-  function resize (newWidth, newHeight) {
-    // TODO: remove ugly hardcodes
-    context.width = newWidth - LayoutConstants.LEFT_PANE_WIDTH - 4
-    context.height = newHeight
-    context.scrollHeight = context.height - LayoutConstants.MARKER_TRACK_HEIGHT
-    scrollbar.setHeight(context.scrollHeight - 24)
+  var needsResize = true
 
+  function resize (newWidth, height) {
+    // data.get('ui:bounds').value = {
+    // 	width: width,
+    // 	height: height
+    // };
+    // TODO: remove ugly hardcodes
+    newWidth -= 4
+    height -= 44
+
+    Settings.width = newWidth - Settings.LEFT_PANE_WIDTH
+    Settings.height = height
+
+    Settings.TIMELINE_SCROLL_HEIGHT = height - Settings.MARKER_TRACK_HEIGHT
+
+    var scrollable_height = Settings.TIMELINE_SCROLL_HEIGHT
+    scrollbar.setHeight(scrollable_height - 2)
+
+    // console.log(newWidth)
     style(scrollbar.dom, {
-      top: LayoutConstants.MARKER_TRACK_HEIGHT + 'px',
-      left: (newWidth - 16 - 4) + 'px'
+      top: Settings.MARKER_TRACK_HEIGHT + 'px',
+      left: (newWidth - 16 - 50) + 'px'
     })
 
     needsResize = true
   }
 
   function restyle (left, right) {
-    left.style.cssText = 'position: absolute; left: 0px; top: 0px; height: ' + context.height + 'px;'
+    left.style.cssText = 'position: absolute; left: 0px; top: 0px; height: ' + Settings.height + 'px;'
     style(left, {
       // background: Theme.a,
       overflow: 'hidden'
     })
-    left.style.width = LayoutConstants.LEFT_PANE_WIDTH + 'px'
+    left.style.width = Settings.LEFT_PANE_WIDTH + 'px'
 
     // right.style.cssText = 'position: absolute; top: 0px;';
     right.style.position = 'absolute'
     right.style.top = '0px'
-    // right.style.width = LayoutConstants.width + 'px'
-    right.style.left = LayoutConstants.LEFT_PANE_WIDTH + 'px'
+    right.style.left = Settings.LEFT_PANE_WIDTH + 'px'
   }
 
-  // // Need to fix
-  // function addLayer (name) {
-  //   var layer = new LayerProp(name)
+  function addLayer (name) {
+    var layer = new LayerProp(name)
 
-  //   layers = layer_store.value
-  //   layers.push(layer)
+    layers = layer_store.value
+    layers.push(layer)
 
-  //   layer_panel.updateState()
-  // }
+    layer_panel.setState(layer_store)
 
-  // this.addLayer = addLayer
+    console.log(layer_store)
+  }
+
+  this.addLayer = addLayer
+
+  function addRenderedLayer () {
+    var tracks = controller.getTracks()
+
+    layers = layer_store.value
+
+    tracks.forEach(element => {
+      layers.push(element)
+      layer_panel.setState(layer_store)
+    })
+
+    console.log(layer_store)
+  }
+
+  this.addRenderedLayer = addRenderedLayer
 
   this.dispose = function dispose () {
     var domParent = pane.parentElement
     domParent.removeChild(pane)
     domParent.removeChild(ghostpane)
-  };
+  }
 
-  (function DockingWindow () {
-    'use strict'
+  this.setTarget = function (t) {
+    controller = t
+  }
 
-    // Minimum resizable area
-    var minWidth = 120
-    var minHeight = 100
+  function getValueRanges (ranges, interval) {
+    interval = interval || 0.15
+    ranges = ranges || 2
 
-    // Thresholds
-    var FULLSCREEN_MARGINS = 2
-    var SNAP_MARGINS = 12
-    var MARGINS = 2
+    // not optimized!
+    var t = data.get('ui:currentTime').value
 
-    var DEFAULT_SNAP = 'full-screen'
+    var values = []
 
-    // End of what's configurable.
+    for (var u = -ranges; u <= ranges; u++) {
+      // if (u == 0) continue;
+      var o = {}
 
-    var clicked = null
-    var onRightEdge, onBottomEdge, onLeftEdge, onTopEdge
-
-    var preSnapped = {
-      width: LayoutConstants.WIDTH,
-      height: LayoutConstants.HEIGHT
-    }
-    var snapType = DEFAULT_SNAP
-
-    var x; var y; var b = pane.getBoundingClientRect()
-
-    var redraw = false
-
-    // var pane = document.getElementById('pane');
-    // var ghostpane = document.getElementById('ghostpane');
-
-    var mouseOnTitle = false
-
-    pane_title.addEventListener('mouseover', function () {
-      mouseOnTitle = true
-    })
-
-    pane_title.addEventListener('mouseout', function () {
-      mouseOnTitle = false
-    })
-
-    // resize_full.onClick(function () {
-    //   // TOOD toggle back to restored size
-    //   if (!preSnapped) {
-    //     preSnapped = {
-    //       width: b.width,
-    //       height: b.height
-    //     }
-    //   }
-
-    //   snapType = 'full-screen'
-    //   resizeEdges()
-    // })
-
-    // pane_status.addEventListener('mouseover', function() {
-    // 	mouseOnTitle = true;
-    // });
-
-    // pane_status.addEventListener('mouseout', function() {
-    // 	mouseOnTitle = false;
-    // });
-
-    window.addEventListener('resize', function () {
-      if (snapType) { resizeEdges() } else { needsResize = true }
-    })
-
-    // utils
-    function setBounds (element, x, y, w, h) {
-      element.style.left = x + 'px'
-      element.style.top = y + 'px'
-      element.style.width = 100 + '%'
-      element.style.height = 100 + '%'
-
-      if (element === pane) {
-        resize(w, h)
-      }
-    }
-
-    function hintHide () {
-      setBounds(ghostpane, b.left, b.top, b.width, b.height)
-      ghostpane.style.opacity = 0
-    }
-
-    setBounds(pane, 0, 0, context.width, context.height)
-    setBounds(ghostpane, 0, 0, context.width, context.height)
-
-    // Mouse events
-    // pane.addEventListener('mousedown', onMouseDown)
-    // pane.addEventListener('mouseover', onMouseOver)
-    // pane.addEventListener('mouseout', onMouseOut)
-    document.addEventListener('mousemove', onMove)
-    document.addEventListener('mouseup', onUp)
-
-    // Touch events
-    pane.addEventListener('touchstart', onTouchDown)
-    document.addEventListener('touchmove', onTouchMove)
-    document.addEventListener('touchend', onTouchEnd)
-
-    var mouseOver = false
-    function onMouseOver (e) { mouseOver = true }
-    function onMouseOut (e) { mouseOver = false }
-
-    function onTouchDown (e) {
-      onDown(e.touches[0])
-      e.preventDefault()
-    }
-
-    function onTouchMove (e) {
-      onMove(e.touches[0])
-    }
-
-    function onTouchEnd (e) {
-      if (e.touches.length === 0) onUp(e.changedTouches[0])
-    }
-
-    function onMouseDown (e) {
-      onDown(e)
-    }
-
-    function onDown (e) {
-      calc(e)
-
-      var isResizing = onRightEdge || onBottomEdge || onTopEdge || onLeftEdge
-      var isMoving = !isResizing && canMove()
-
-      clicked = {
-        x: x,
-        y: y,
-        cx: e.clientX,
-        cy: e.clientY,
-        w: b.width,
-        h: b.height,
-        isResizing: isResizing,
-        isMoving: isMoving,
-        onTopEdge: onTopEdge,
-        onLeftEdge: onLeftEdge,
-        onRightEdge: onRightEdge,
-        onBottomEdge: onBottomEdge
+      for (var l = 0; l < layers.length; l++) {
+        var layer = layers[l]
+        var m = utils.timeAtLayer(layer, t + u * interval)
+        o[layer.name] = m.value
       }
 
-      if (isResizing || isMoving) {
-        e.preventDefault()
-      }
-      e.stopPropagation()
+      values.push(o)
     }
 
-    function canMove () {
-      return mouseOnTitle
-      // return x > 0 && x < b.width && y > 0 && y < b.height
-      // && y < 18;
-    }
+    return values
+  }
 
-    function calc (e) {
-      b = pane.getBoundingClientRect()
-      x = e.clientX - b.left
-      y = e.clientY - b.top
+  this.getValues = getValueRanges
 
-      onTopEdge = y < MARGINS
-      onLeftEdge = x < MARGINS
-      onRightEdge = x >= b.width - MARGINS
-      onBottomEdge = y >= b.height - MARGINS
-    }
+  /* Integrate pane into docking window */
+  var widget = new DockingWindow(pane, ghostpane)
+  widget.allowMove(false)
+  widget.resizes.do(resize)
 
-    var e // current mousemove event
+  pane_title.addEventListener('mouseover', function () {
+    widget.allowMove(true)
+  })
 
-    function onMove (ee) {
-      e = ee
-      calc(e)
-
-      redraw = true
-
-      if (mouseOver) {
-        e.stopPropagation()
-      }
-    }
-
-    function animate () {
-      requestAnimationFrame(animate)
-
-      if (!redraw) return
-
-      redraw = false
-
-      if (clicked && clicked.isResizing) {
-        if (clicked.onRightEdge) pane.style.width = Math.max(x, minWidth) + 'px'
-        if (clicked.onBottomEdge) pane.style.height = Math.max(y, minHeight) + 'px'
-
-        if (clicked.onLeftEdge) {
-          var currentWidth = Math.max(clicked.cx - e.clientX + clicked.w, minWidth)
-          if (currentWidth > minWidth) {
-            pane.style.width = currentWidth + 'px'
-            pane.style.left = e.clientX + 'px'
-          }
-        }
-
-        if (clicked.onTopEdge) {
-          var currentHeight = Math.max(clicked.cy - e.clientY + clicked.h, minHeight)
-          if (currentHeight > minHeight) {
-            pane.style.height = currentHeight + 'px'
-            pane.style.top = e.clientY + 'px'
-          }
-        }
-
-        hintHide()
-
-        resize(b.width, b.height)
-
-        return
-      }
-
-      if (clicked && clicked.isMoving) {
-        switch (checks()) {
-          case 'full-screen':
-            setBounds(ghostpane, 0, 0, window.innerWidth, context.height)
-            ghostpane.style.opacity = 0.2
-            break
-          case 'snap-top-edge':
-            setBounds(ghostpane, 0, 0, window.innerWidth, window.innerHeight * 0.25)
-            ghostpane.style.opacity = 0.2
-            break
-          case 'snap-left-edge':
-            setBounds(ghostpane, 0, 0, window.innerWidth * 0.35, window.innerHeight)
-            ghostpane.style.opacity = 0.2
-            break
-          case 'snap-right-edge':
-            setBounds(ghostpane, window.innerWidth * 0.65, 0, window.innerWidth * 0.35, window.innerHeight)
-            ghostpane.style.opacity = 0.2
-            break
-          case 'snap-bottom-edge':
-            setBounds(ghostpane, 0, window.innerHeight * 0.75, window.innerWidth, window.innerHeight * 0.25)
-            ghostpane.style.opacity = 0.2
-            break
-          default:
-            hintHide()
-        }
-
-        if (preSnapped) {
-          setBounds(pane,
-            e.clientX - preSnapped.width / 2,
-            e.clientY - Math.min(clicked.y, preSnapped.height),
-            preSnapped.width,
-            preSnapped.height
-          )
-          return
-        }
-
-        // moving
-        pane.style.top = (e.clientY - clicked.y) + 'px'
-        pane.style.left = (e.clientX - clicked.x) + 'px'
-
-        return
-      }
-
-      // This code executes when mouse moves without clicking
-
-      // style cursor
-      if ((onRightEdge && onBottomEdge) || (onLeftEdge && onTopEdge)) {
-        pane.style.cursor = 'nwse-resize'
-      } else if ((onRightEdge && onTopEdge) || (onBottomEdge && onLeftEdge)) {
-        pane.style.cursor = 'nesw-resize'
-      } else if (onRightEdge || onLeftEdge) {
-        pane.style.cursor = 'ew-resize'
-      } else if (onBottomEdge || onTopEdge) {
-        pane.style.cursor = 'ns-resize'
-      } else if (canMove()) {
-        pane.style.cursor = 'move'
-      } else {
-        pane.style.cursor = 'default'
-      }
-    }
-
-    function checks () {
-      /*
-			var rightScreenEdge, bottomScreenEdge;
-
-			rightScreenEdge = window.innerWidth - MARGINS;
-			bottomScreenEdge = window.innerHeight - MARGINS;
-
-			// Edge Checkings
-			// hintFull();
-			if (b.top < FULLSCREEN_MARGINS || b.left < FULLSCREEN_MARGINS || b.right > window.innerWidth - FULLSCREEN_MARGINS || b.bottom > window.innerHeight - FULLSCREEN_MARGINS)
-				return 'full-screen';
-
-			// hintTop();
-			if (b.top < MARGINS) return 'snap-top-edge';
-
-			// hintLeft();
-			if (b.left < MARGINS) return 'snap-left-edge';
-
-			// hintRight();
-			if (b.right > rightScreenEdge) return 'snap-right-edge';
-
-			// hintBottom();
-			if (b.bottom > bottomScreenEdge) return 'snap-bottom-edge';
-			*/
-
-      if (e.clientY < FULLSCREEN_MARGINS) return 'full-screen'
-
-      if (e.clientY < SNAP_MARGINS) return 'snap-top-edge'
-
-      // hintLeft();
-      if (e.clientX < SNAP_MARGINS) return 'snap-left-edge'
-
-      // hintRight();
-      if (window.innerWidth - e.clientX < SNAP_MARGINS) return 'snap-right-edge'
-
-      // hintBottom();
-      if (window.innerHeight - e.clientY < SNAP_MARGINS) return 'snap-bottom-edge'
-    }
-
-    animate()
-
-    function resizeEdges () {
-      var x, y, w, h
-      switch (snapType) {
-        case 'full-screen':
-          // console.log(container.parentElement.parentElement.parentElement.clientHeight)
-          x = 0
-          y = 0
-          w = controller.getContainerWidth()
-          // h = window.innerHeight
-          h = controller.getContainerHeight()
-          // h = container.parentElement.parentElement.clientHeight
-          break
-        case 'snap-top-edge':
-          x = 0
-          y = 0
-          w = window.innerWidth
-          h = window.innerHeight * 0.3
-          break
-        case 'snap-left-edge':
-          x = 0
-          y = 0
-          w = window.innerWidth * 0.35
-          h = window.innerHeight
-          break
-        case 'snap-right-edge':
-          x = window.innerWidth * 0.65
-          y = 0
-          w = window.innerWidth * 0.35
-          h = window.innerHeight
-          break
-        case 'snap-bottom-edge':
-          x = 0
-          y = window.innerHeight * 0.75
-          w = window.innerWidth
-          h = window.innerHeight * 0.5
-          break
-        default:
-          return
-      }
-      setBounds(pane, x, y, w, h)
-      setBounds(ghostpane, x, y, w, h)
-    }
-
-    function onUp (e) {
-      calc(e)
-
-      if (clicked && clicked.isMoving) {
-        // Snap
-        snapType = checks()
-        if (snapType) {
-          preSnapped = {
-            width: b.width,
-            height: b.height
-          }
-          resizeEdges()
-        } else {
-          preSnapped = null
-        }
-
-        hintHide()
-      }
-
-      clicked = null
-
-      if (mouseOver) {
-        e.stopPropagation()
-      }
-    }
-
-    resizeEdges()
-  })()
+  pane_title.addEventListener('mouseout', function () {
+    widget.allowMove(false)
+  })
 }
-
-Timeliner.binarySearch = utils.binarySearch
 
 window.Timeliner = Timeliner
 
