@@ -49,8 +49,6 @@ class TimelinerController {
   }
 
   init () {
-    console.log('called')
-
     this.data = new DataStore()
     this.layer_store = this.data.get('layers')
 
@@ -63,8 +61,8 @@ class TimelinerController {
     }
 
     this.layer_store.value = tracks
+    this._tracks = tracks
 
-    console.log(this._tracks)
     this._clip = new AnimationClip('editclip', 0, tracks)
     // console.log(this._clip)
     this._action = this._mixer.clipAction(this._clip).play()
@@ -117,7 +115,11 @@ class TimelinerController {
     // console.log(this._tracks.find(item=>item.name==channelName))
     // console.log(this._tracks)
     // var track = this._tracks[channelName]
-    var track = this._tracks.find(item => item.name === channelName)
+
+    console.log(this.layer_store.value.find(item => item.name === channelName))
+    var track = this.layer_store.value.find(item => item.name === channelName)
+    // var track = this._tracks.find(item => item.name === channelName)
+
     var times = track.times
     var index = Timeliner.binarySearch(times, time)
     var values = track.values

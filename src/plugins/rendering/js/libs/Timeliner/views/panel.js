@@ -15,8 +15,8 @@ const proxy_ctx = utils.proxy_ctx
 
 var LINE_HEIGHT = LayoutConstants.LINE_HEIGHT
 var DIAMOND_SIZE = LayoutConstants.DIAMOND_SIZE
-var TIME_SCROLLER_HEIGHT = 35
-var MARKER_TRACK_HEIGHT = 25
+var TIME_SCROLLER_HEIGHT = 32
+var MARKER_TRACK_HEIGHT = 28
 var LEFT_PANE_WIDTH = LayoutConstants.LEFT_PANE_WIDTH
 var time_scale = LayoutConstants.time_scale
 // var SCROLL_HEIGHT = LayoutConstants.SCROLL_HEIGHT
@@ -80,7 +80,7 @@ function TimelinePanel (controller, data, dispatcher) {
     track_canvas.height = (LayoutConstants.height) * dpr
     // track_canvas.style.width = LayoutConstants.width + 'px'
     track_canvas.style.width = controller.getContainerWidth() - LayoutConstants.LEFT_PANE_WIDTH + 'px'
-    track_canvas.style.height = h + 'px'
+    track_canvas.style.height = LayoutConstants.height - TIME_SCROLLER_HEIGHT + 'px'
     SCROLL_HEIGHT = LayoutConstants.height - TIME_SCROLLER_HEIGHT
     scroll_canvas.setSize(controller.getContainerWidth(), TIME_SCROLLER_HEIGHT)
   }
@@ -99,8 +99,8 @@ function TimelinePanel (controller, data, dispatcher) {
 
   utils.style(scroll_canvas.dom, {
     position: 'absolute',
-    top: '0px',
-    left: '10px'
+    top: '0px'
+    // left: '10px'
   })
 
   scroll_canvas.uses(new ScrollCanvas(dispatcher, data))
@@ -226,7 +226,7 @@ function TimelinePanel (controller, data, dispatcher) {
     for (i = 0, il = layers.length; i <= il; i++) {
       ctx.strokeStyle = Theme.b
       ctx.beginPath()
-      y = i * LINE_HEIGHT
+      y = i * (LINE_HEIGHT)
       y = ~~y - 0.5
 
       ctx_wrap
@@ -243,7 +243,7 @@ function TimelinePanel (controller, data, dispatcher) {
       var layer = layers[i]
       var values = layer.values
 
-      y = i * LINE_HEIGHT
+      y = i * (LINE_HEIGHT)
 
       for (j = 0; j < values.length - 1; j++) {
         frame = values[j]
@@ -385,7 +385,7 @@ function TimelinePanel (controller, data, dispatcher) {
     var units = time_scale / tickMark1
     var offsetUnits = (frame_start * time_scale) % units
 
-    var count = (width - LEFT_GUTTER + offsetUnits) / units
+    var count = (controller.getContainerWidth() - LEFT_GUTTER + offsetUnits) / units
 
     // console.log('time_scale', time_scale, 'tickMark1', tickMark1, 'units', units, 'offsetUnits', offsetUnits, frame_start);
 
@@ -404,16 +404,17 @@ function TimelinePanel (controller, data, dispatcher) {
       ctx.lineTo(x, height)
       ctx.stroke()
 
-      ctx.fillStyle = Theme.d
+      ctx.fillStyle = Theme.c
+
       ctx.textAlign = 'center'
 
       var t = (i * units - offsetUnits) / time_scale + frame_start
       t = utils.format_friendly_seconds(t)
-      ctx.fillText(t, x, 38)
+      ctx.fillText(t, x, 10)
     }
 
     units = time_scale / tickMark2
-    count = (width - LEFT_GUTTER + offsetUnits) / units
+    count = (controller.getContainerWidth() - LEFT_GUTTER + offsetUnits) / units
 
     // marker lines - main
     for (i = 0; i < count; i++) {
@@ -421,7 +422,7 @@ function TimelinePanel (controller, data, dispatcher) {
       ctx.beginPath()
       x = i * units + LEFT_GUTTER - offsetUnits
       ctx.moveTo(x, MARKER_TRACK_HEIGHT - 0)
-      ctx.lineTo(x, MARKER_TRACK_HEIGHT - 16)
+      ctx.lineTo(x, MARKER_TRACK_HEIGHT - 14)
       ctx.stroke()
     }
 
@@ -436,7 +437,7 @@ function TimelinePanel (controller, data, dispatcher) {
       ctx.beginPath()
       x = i * units + LEFT_GUTTER - offsetUnits
       ctx.moveTo(x, MARKER_TRACK_HEIGHT - 0)
-      ctx.lineTo(x, MARKER_TRACK_HEIGHT - 10)
+      ctx.lineTo(x, MARKER_TRACK_HEIGHT - 8)
       ctx.stroke()
     }
 
@@ -528,7 +529,9 @@ function TimelinePanel (controller, data, dispatcher) {
 
     var track = y_to_track(my)
     var s = x_to_time(mx)
-    console.log(layers[track])
+
+    console.log(layers[track].name)
+
     dispatcher.fire('keyframe', layers[track], currentTime)
   })
 
@@ -560,7 +563,7 @@ function TimelinePanel (controller, data, dispatcher) {
     }
     pointerEvents()
 
-    if (!mousedownItem) dispatcher.fire('time.update', x_to_time(e.offsetx))
+    if (!mousedownItem) dispatcher.fire('time.update', x_to_time(pointer.x))
     // Hit criteria
   }, function move (e) {
     mousedown2 = false
@@ -570,13 +573,13 @@ function TimelinePanel (controller, data, dispatcher) {
         mousedownItem.mousedrag(e)
       }
     } else {
-      dispatcher.fire('time.update', x_to_time(e.offsetx))
+      dispatcher.fire('time.update', x_to_time(pointer.x))
     }
   }, function up (e) {
     if (mouseDownThenMove) {
       dispatcher.fire('keyframe.move')
     } else {
-      dispatcher.fire('time.update', x_to_time(e.offsetx))
+      dispatcher.fire('time.update', x_to_time(pointer.x))
     }
     mousedown2 = false
     mousedownItem = null

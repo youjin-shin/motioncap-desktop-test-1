@@ -82,7 +82,7 @@ function LayerCabinet (data, dispatcher) {
   range.step = 0.125
 
   style(range, {
-    width: '90px',
+    width: '80px',
     margin: '0px',
     marginLeft: '2px',
     marginRight: '2px'
@@ -340,7 +340,7 @@ function LayerCabinet (data, dispatcher) {
   }
 
   function changeRange () {
-    dispatcher.fire('update.scale', 6 * Math.pow(100, -range.value))
+    dispatcher.fire('update.scale', 6 * Math.pow(100, range.value))
   }
 
   var layer_uis = []; var visible_layers = 0

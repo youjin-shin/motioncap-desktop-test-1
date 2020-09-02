@@ -12,7 +12,7 @@
 
 import * as THREE from '@/plugins/rendering/build/three.module'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-// import { FBXLoader } from './jsm/loaders/FBXLoader.js'
+// import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
 
 import Stats from 'three/examples/jsm/libs/stats.module.js'
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module.js'
@@ -49,7 +49,7 @@ export default {
       // path: '/models/gltf/exo2.glb',
       path: '/models/gltf/Soldier.glb',
 
-      // path: '/models/fbx/Zepeto.fbx',
+      // path: '/models/fbx/xbot.fbx',
       actions: [],
       bonePivotSize: 1.2,
       settings: [],
@@ -80,8 +80,8 @@ export default {
       // scene.add(clock)
 
       scene = new THREE.Scene()
-      scene.background = new THREE.Color(Theme.renderingBackgroundDark)
-      scene.fog = new THREE.Fog(Theme.renderingBackgroundDark, 10, 50)
+      scene.background = new THREE.Color(Theme.renderingFog)
+      scene.fog = new THREE.Fog(Theme.renderingFog, 10, 50)
 
       // grid = new THREE.GridHelper(16, 16, 0xff0000, 0x222222)
       // scene.add(grid)
@@ -117,13 +117,13 @@ export default {
       this.container.appendChild(renderer.domElement)
 
       // ground
-      var texture = new THREE.TextureLoader().load('textures/texture_01.png', this.render)
+      var texture = new THREE.TextureLoader().load('textures/texture_05.png', this.render)
       texture.wrapS = THREE.RepeatWrapping
       texture.wrapT = THREE.RepeatWrapping
       texture.repeat.set(50, 50)
       var mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(100, 100),
         new THREE.MeshPhongMaterial({
-          color: Theme.renderingBackgroundDark,
+          color: Theme.renderingBackground,
           map: texture,
           depthWrite: false
         }))
@@ -151,84 +151,66 @@ export default {
 
       var loader = new GLTFLoader()
       if (this.path !== undefined) {
-        loader.load(this.path, (gltf) => {
-          model = gltf.scene
+        loader.load(this.path,
 
-          // console.log(gltf)
-          scene.add(model)
+          (gltf) => {
+            model = gltf.scene
 
-          model.traverse((object) => {
-            if (object.isMesh) object.castShadow = true
-          })
+            scene.add(model)
 
-          //
+            model.traverse((object) => {
+              if (object.isMesh) object.castShadow = true
+            })
 
-          console.log(model)
-          skeleton = new THREE.SkeletonHelper(model)
-          skeleton.visible = true
+            skeleton = new THREE.SkeletonHelper(model)
+            skeleton.visible = true
 
-          skeleton.bones.forEach(element => {
-            var materials = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.5, transparent: true })
-            materials.depthWrite = false
-            materials.depthTest = false
-            var mesh = new THREE.Mesh(new THREE.SphereGeometry(this.bonePivotSize), materials)
-            this.objects.push(element)
-            element.add(mesh)
-          })
+            skeleton.bones.forEach(element => {
+              var materials = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.5, transparent: true })
+              materials.depthWrite = false
+              materials.depthTest = false
+              var mesh = new THREE.Mesh(new THREE.SphereGeometry(this.bonePivotSize), materials)
+              this.objects.push(element)
+              element.add(mesh)
+            })
 
-          scene.add(skeleton)
+            scene.add(skeleton)
 
-          //
+            //
 
-          //
-          var animations = gltf.animations
+            //
+            var animations = gltf.animations
 
-          mixer = new THREE.AnimationMixer(model)
+            mixer = new THREE.AnimationMixer(model)
 
-          // var jsonObject = JSON.stringify(animations[0])
-          // console.log(jsonObject)
+            // var jsonObject = JSON.stringify(animations[0])
+            // console.log(jsonObject)
 
-          animations.forEach(element => {
-            if (element.name !== 'TPose') {
-              this.actions.push(mixer.clipAction(element))
-            }
-          })
+            animations.forEach(element => {
+              if (element.name !== 'TPose') {
+                this.actions.push(mixer.clipAction(element))
+              }
+            })
 
-          // if (!this.isGUIOn) { this.createPanel() }
+            // if (!this.isGUIOn) { this.createPanel() }
 
-          this.activateAllActions()
-          this.animate()
+            this.activateAllActions()
+            this.animate()
 
-          scene.add(transformControls)
+            scene.add(transformControls)
 
-          // for (var i = 0; i < this.objects.length; i++) {
-          //   var vectorValue = Object.values(this.objects[i].position)
-          //   var quaternionValue = Object.values(this.objects[i].quaternion)
-          //   quaternionValue.pop()
-          //   this.trackInfo.push({
-          //     type: THREE.VectorKeyframeTrack,
-          //     propertyPath: this.objects[i].name + '.position',
-          //     initialValue: vectorValue,
-          //     interpolation: THREE.InterpolateSmooth
-          //   })
+            this.$emit('initTimeline', scene, this.objects, this.render)
+          },
+          (xhr) => {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded')
+          },
+          // eslint-disable-next-line handle-callback-err
+          (error) => {
+            console.log('An error happened')
 
-          //   this.trackInfo.push(
-          //     {
-          //       type: THREE.QuaternionKeyframeTrack,
-          //       propertyPath: this.objects[i].name + '.quaternion',
-          //       initialValue: quaternionValue,
-          //       interpolation: THREE.InterpolateLinear
-
-          //     })
-          // }
-
-          // console.log(this.trackInfo)
-
-          // // eslint-disable-next-line no-new
-          // new Timeliner(new TimelinerController(scene, this.trackInfo, this.render))
-
-          this.$emit('initTimeline', scene, this.objects, this.render)
-        })
+            this.$emit('initTimeline', scene, this.objects, this.render)
+          }
+        )
       }
       // Event Listners
       dragControls = new DragControls(this.objects, camera, renderer.domElement) //

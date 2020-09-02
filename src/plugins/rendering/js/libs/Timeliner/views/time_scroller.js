@@ -24,7 +24,7 @@ Rect.prototype.set = function (x, y, w, h, color, outline) {
 }
 
 Rect.prototype.paint = function (ctx) {
-  ctx.fillStyle = Theme.d // // 'yellow';
+  ctx.fillStyle = Theme.b // // 'yellow';
   ctx.strokeStyle = Theme.b
 
   this.shape(ctx)
@@ -73,16 +73,18 @@ function ScrollCanvas (dispatcher, data) {
     ctx.scale(dpr, dpr)
 
     var w = width - 2 * MARGINS
-    var h = 16 // TOP_SCROLL_TRACK;
+    var h = 20 // TOP_SCROLL_TRACK;
 
     ctx.clearRect(0, 0, width, height)
     ctx.translate(MARGINS, 5)
 
     // outline scroller
     ctx.beginPath()
-    ctx.strokeStyle = Theme.b
+    ctx.fillStyle = Theme.d // // 'yellow';
+    ctx.strokeStyle = Theme.d
     ctx.rect(0, 0, w, h)
     ctx.stroke()
+    ctx.fill()
 
     var totalTimePixels = totalTime * pixels_per_second
     var k = w / totalTimePixels
@@ -90,6 +92,7 @@ function ScrollCanvas (dispatcher, data) {
 
     var grip_length = w * k
 
+    // scroller grip
     scroller.grip_length = grip_length
 
     scroller.left = scrollTime / totalTime * w
@@ -99,8 +102,8 @@ function ScrollCanvas (dispatcher, data) {
 
     var r = currentTime / totalTime * w
 
-    ctx.fillStyle = Theme.b
-    ctx.lineWidth = 2
+    ctx.fillStyle = 'red'
+    ctx.lineWidth = 4
 
     ctx.beginPath()
 
@@ -108,12 +111,12 @@ function ScrollCanvas (dispatcher, data) {
     // ctx.arc(r, h2 / 2, h2 / 1.5, 0, Math.PI * 2);
 
     // line
-    ctx.rect(r, 0, 2, h + 5)
+    ctx.rect(r, 0, 1, h)
     ctx.fill()
 
-    ctx.fillText(currentTime && currentTime.toFixed(2), r, h + 14)
+    // ctx.fillText(currentTime && currentTime.toFixed(2), r, h + 14)
     // ctx.fillText(currentTime && currentTime.toFixed(3), 10, 10);
-    ctx.fillText(totalTime, 300, 14)
+    // ctx.fillText(totalTime, 300, 14)
 
     ctx.restore()
   }

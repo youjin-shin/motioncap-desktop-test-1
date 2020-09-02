@@ -49,12 +49,12 @@
 
 <style>
 .main-container {
-  background: #222222;
+  background: #e6e6e6;
 }
 .section-card {
   border-radius: 5px 5px;
   overflow: hidden;
-  background: #1f1f1f;
+  background: #f5f5f5;
   height: 100%;
 }
 </style>

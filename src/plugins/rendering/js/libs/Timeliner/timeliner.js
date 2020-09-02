@@ -71,21 +71,23 @@ function Timeliner (controller) {
     var t = data.get('ui:currentTime').value
     var v = utils.findTimeinLayer(layer, t)
 
-    // console.log(v, '...keyframe index', index, utils.format_friendly_seconds(t), typeof(v));
-    // console.log('layer', layer, value);
-
     if (typeof (v) === 'number') {
+      console.log(value)
       layer.values.splice(v, 0, {
         time: t,
         value: value,
         _color: '#' + (Math.random() * 0xffffff | 0).toString(16)
       })
+      // controller.setKeyframe(layer.name, t)
+      // layer.values.splice(v, 0, value)
+      // layer.times.splice(v, 0, t)
 
       undo_manager.save(new UndoState(data, 'Add Keyframe'))
     } else {
       console.log('remove from index', v)
       layer.values.splice(v.index, 1)
 
+      // controller.delKeyframe(layer.name, t)
       undo_manager.save(new UndoState(data, 'Remove Keyframe'))
     }
 
@@ -441,7 +443,7 @@ function Timeliner (controller) {
     backgroundColor: Theme.a,
     color: Theme.d,
     zIndex: Z_INDEX,
-    fontFamily: 'monospace',
+    fontFamily: '',
     fontSize: '12px'
   })
 
@@ -836,6 +838,7 @@ function Timeliner (controller) {
     widget.allowMove(false)
   })
 }
+Timeliner.binarySearch = utils.findTimeinLayer
 
 window.Timeliner = Timeliner
 
