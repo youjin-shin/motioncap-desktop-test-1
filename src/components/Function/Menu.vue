@@ -27,20 +27,27 @@
           </v-list-item>
       </v-list>
       </v-menu> -->
-<v-select dense
-  min-width="10%"
-  :items="items"
-  label=""
-  v-model="index"
-  class="pa-2">
-</v-select>
+      <v-select class="custom" depressed
+      min-width="10%"
+      :items="items"
+      v-model="index"
+      autowidth></v-select>
+
       <Rigging v-if="index == 'Rigging'" />
       <Lighting v-if="index == 'Lighting'" />
       <Rendering v-if="index == 'Rendering'" />
       <Properties v-if="index == 'Properties'" />
   </div>
-
 </template>
+
+<style>
+.custom.v-text-field>.v-input__control>.v-input__slot:before {
+    border-style: none;
+}
+.custom.v-text-field>.v-input__control>.v-input__slot:after {
+    border-style: none;
+}
+</style>
 
 <script>
 import Rigging from './Rigging.vue'

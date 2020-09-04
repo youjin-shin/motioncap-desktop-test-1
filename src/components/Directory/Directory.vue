@@ -1,43 +1,21 @@
 
 <template>
-<v-container class="pa-4" depressed
+<v-container class="pa-4" custom depressed
 width="auto">
 <!-- <v-tabs> -->
   <!-- <v-tab>Library</v-tab> -->
   <!-- <v-tab>Samples</v-tab> -->
 <!-- </v-tabs> -->
 
-    <div>
-    <!-- <v-menu open-on-hover offset-y depresssed> -->
-    <!-- <template v-slot:activator="{on, attrs}"> -->
-    <!-- <v-btn text color="" v-bind="attrs" v-on="on">Directory -->
-      <!-- <v-select :items="items"> -->
-            <!-- </v-select> -->
-      <!-- <v-img -->
-    <!-- src='@/assets/menu_drawer.png' -->
-    <!-- width="12" -->
-    <!-- class="ml-2" -->
-    <!-- contain></v-img > -->
-    <!-- </v-btn> -->
-    <!-- </template> -->
-
-    <!-- <v-list> -->
-    <!-- <v-list-item -->
-    <!-- v-for="(item, index) in items" -->
-    <!-- :key="index" -->
-    <!-- @click="index"> -->
-    <!-- <v-list-item-title>{{item.title}}</v-list-item-title> -->
-    <!-- </v-list-item> -->
-    <!-- </v-list> -->
-    <!-- </v-menu> -->
-
-<v-select dense
+<div>
+<v-select depressed
   min-width="10%"
   :items="items"
   label=""
   v-model="index"
-  class="pa-2">
+  class="custom">
 </v-select>
+
 <Library v-if="index == 'Library'" />
 <Samples v-if="index == 'Samples'" />
     <!-- <v-menu open-on-hover offset-y depresssed align="end"> -->

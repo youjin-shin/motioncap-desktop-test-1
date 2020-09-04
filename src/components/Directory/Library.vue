@@ -6,7 +6,7 @@
   class="ma-0 pa-0">
   <v-text-field
   solo
-  label="Search Samples"
+  label="Search Projects"
   prepend-inner-icon="mdi-magnify"
   class="ma-0 pa-0 ">
   </v-text-field>
@@ -54,7 +54,7 @@
           <v-list-item
             v-for="(crud, i) in cruds"
             :key="i"
-            @click="foo"
+            @click="i"
           >
             <v-list-item-title v-text="crud[0]"></v-list-item-title>
             <v-list-item-action>
