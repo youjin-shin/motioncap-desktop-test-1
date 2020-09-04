@@ -1,37 +1,50 @@
 <template>
 <v-container
-  class="main-container px-7"
+  class="main-container px-0"
   fluid
   fill-height
+  align-start
 >
-<v-layout row wrap>
-  <v-row>
-    <v-col cols="2.5" class="pa-1">
-      <div class="section-card ">
-      <Directory />
-      </div>
-    </v-col>
-<!-- style="align-self: baseline" -->
-    <v-col cols="7" class="pa-1" >
-      <div class="section-card">
-        <RenderingSection @initTimeline="initTimeline"/>
-      </div>
-    </v-col>
-    <v-col cols="2.5" class="pa-1">
-      <div class="section-card ">
-      <Menu />
-      </div>
-    </v-col>
-    <v-col cols="12" class="pa-1">
-    <div class="section-card pa-2">
-      <TimelineSection ref="TimelineSection"/>
-    </div>
-    </v-col>
-  </v-row>
 
-  <!-- <v-row>
-  </v-row> -->
-</v-layout>
+  <v-container
+    class="main-container px-7 py-0"
+    fluid
+
+  >
+    <v-row>
+      <v-col cols="2" class="" style="padding: 2px;">
+        <div class="section-card ">
+        <Directory />
+        </div>
+      </v-col>
+  <!-- style="align-self: baseline" -->
+      <v-col  cols="8" class=""  style="padding: 2px;">
+        <div class="section-card">
+          <RenderingSection @initTimeline="initTimeline"/>
+        </div>
+      </v-col>
+      <v-col cols="2" class=""  style="padding: 2px;">
+        <div class="section-card ">
+        <Menu />
+        </div>
+      </v-col>
+    </v-row>
+  </v-container>
+
+  <v-container
+    class="main-container px-7 py-0"
+    fluid
+  >
+    <v-row style="height: 31vh" >
+      <v-col cols="12" class="py-0" style="padding: 2px;" >
+      <div  class="section-card pa-2">
+        <TimelineSection ref="TimelineSection"/>
+>>>>>>> upstream/develop
+      </div>
+      </v-col>
+    </v-row>
+
+  </v-container>
 
 </v-container>
 </template>
@@ -70,7 +83,6 @@ export default {
     TimelineSection,
     Directory,
     Menu
-
   },
   data () {
     return {
