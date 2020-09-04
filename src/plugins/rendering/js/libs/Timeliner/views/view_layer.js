@@ -16,7 +16,7 @@ function LayerView (layer, dispatcher) {
 
   var label = document.createElement('span')
 
-  label.style.cssText = 'font-size: 14px; padding: 4px;'
+  label.style.cssText = 'font-size: 14px; padding: 4px; vertical-align: -webkit-baseline-middle;'
 
   label.addEventListener('click', function (e) {
     // context.dispatcher.fire('label', channelName);
@@ -28,7 +28,7 @@ function LayerView (layer, dispatcher) {
 
   var dropdown = document.createElement('select')
   var option
-  dropdown.style.cssText = 'font-size: 10px; width: 60px; margin: 0; float: right; text-align: right;'
+  dropdown.style.cssText = 'border: 1px solid black; border-radius: 5px;  padding: 4px; font-size: 14px; width: 20%; margin: 0; float: right; text-align: right;'
 
   for (var k in Tweens) {
     option = document.createElement('option')
@@ -50,6 +50,14 @@ function LayerView (layer, dispatcher) {
     dispatcher.fire('keyframe', layer, state.get('_value').value)
   })
 
+  var color_button = document.createElement('button')
+  color_button.innerHTML = '&#9679;' // '&diams;' &#9671; 9679 9670 9672
+  color_button.style.cssText = 'background: none; font-size: 12px; padding: 0px; font-family: ; float: right; width: 20px; height: ' + height + 'px; border-style:none; outline: none;' //  border-style:inset;
+
+  color_button.addEventListener('click', function (e) {
+    // console.log('clicked:keyframing...', state.get('_value').value)
+    // dispatcher.fire('keyframe', layer, state.get('_value').value)
+  })
   /*
 	// Prev Keyframe
 	var button = document.createElement('button');
@@ -125,7 +133,7 @@ function LayerView (layer, dispatcher) {
 
   dom.appendChild(label)
   dom.appendChild(keyframe_button)
-  dom.appendChild(number.dom)
+  // dom.appendChild(number.dom)
   dom.appendChild(dropdown)
 
   utils.style(dom, {
@@ -152,7 +160,7 @@ function LayerView (layer, dispatcher) {
       tmp_value.value = 0
     }
 
-    number.setValue(tmp_value.value)
+    // number.setValue(tmp_value.value)
     label.textContent = state.get('name').value
 
     repaint()

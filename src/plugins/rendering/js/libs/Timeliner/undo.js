@@ -6,8 +6,8 @@
 /* eslint-disable no-tabs */
 
 function UndoState (state, description) {
-  // this.state = JSON.stringify(state);
-  this.state = state.getJSONString()
+  this.state = JSON.stringify(state)
+  // this.state = state.getJSONString()
   this.description = description
 }
 

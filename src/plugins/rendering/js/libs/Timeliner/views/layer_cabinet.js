@@ -361,6 +361,7 @@ function LayerCabinet (data, dispatcher) {
 
   this.setState = function (state) {
     layer_store = state
+    console.log(layer_store)
     var layers = layer_store.value
     // layers = state;
     // console.log(layer_uis.length, layers)
@@ -381,7 +382,7 @@ function LayerCabinet (data, dispatcher) {
         layer_uis.push(layer_ui)
       }
 
-      // layer_uis[i].setState(layer);
+      // layer_uis[i].setState(layer)
     }
 
     console.log('Total layers (view, hidden, total)', layer_uis.length, unused_layers.length,

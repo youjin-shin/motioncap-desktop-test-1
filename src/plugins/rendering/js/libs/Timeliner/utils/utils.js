@@ -4,7 +4,7 @@
 /* eslint-disable no-tabs */
 import { Tweens } from './util_tween.js'
 
-var STORAGE_PREFIX = 'timeliner-'
+var STORAGE_PREFIX = ''
 
 /**************************/
 // Utils

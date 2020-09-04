@@ -44,8 +44,9 @@ function Timeliner (controller) {
   var dispatcher = new Dispatcher()
   controller.init()
   // Data
-  var data = controller.data
-  var layer_store = controller.layer_store
+  var data = controller._data
+  var layer_store = controller._layer_store
+
   console.log(layer_store)
   var layers = layer_store.value
 
@@ -223,6 +224,7 @@ function Timeliner (controller) {
   }
 
   dispatcher.on('target.notify', function (name, value) {
+    // console.log(controller)
     if (controller) controller[name] = value
   })
 
@@ -360,7 +362,7 @@ function Timeliner (controller) {
   }
 
   function updateState () {
-    layers = layer_store.value // FIXME: support Arrays
+    // layers = layer_store.value // FIXME: support Arrays
     layer_panel.setState(layer_store)
     timeline.setState(layer_store)
 

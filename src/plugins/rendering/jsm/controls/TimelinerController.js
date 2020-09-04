@@ -30,9 +30,6 @@ import { DataStore } from '../../js/libs/Timeliner/utils/util_datastore'
 
 class TimelinerController {
   constructor (scene, trackInfo, onUpdate, container) {
-    this.data = undefined
-    this.layer_store = undefined
-
     this._scene = scene
     this._trackInfo = trackInfo
     this._container = container
@@ -46,12 +43,12 @@ class TimelinerController {
     this._tracks = []
     this._propRefs = {}
     this._channelNames = []
+
+    this._data = undefined
+    this._layer_store = undefined
   }
 
   init () {
-    this.data = new DataStore()
-    this.layer_store = this.data.get('layers')
-
     var tracks = []
     var trackInfo = this._trackInfo
 
@@ -60,8 +57,12 @@ class TimelinerController {
       tracks.push(this._addTrack(spec.type, spec.propertyPath, spec.initialValue, spec.interpolation))
     }
 
-    this.layer_store.value = tracks
     this._tracks = tracks
+
+    this._data = new DataStore()
+    this._layer_store = this._data.get('layers')
+
+    this._layer_store.value = tracks
 
     this._clip = new AnimationClip('editclip', 0, tracks)
     // console.log(this._clip)
@@ -116,9 +117,9 @@ class TimelinerController {
     // console.log(this._tracks)
     // var track = this._tracks[channelName]
 
-    console.log(this.layer_store.value.find(item => item.name === channelName))
-    var track = this.layer_store.value.find(item => item.name === channelName)
-    // var track = this._tracks.find(item => item.name === channelName)
+    // console.log(this.layer_store.value.find(item => item.name === channelName))
+    // var track = this.layer_store.value.find(item => item.name === channelName)
+    var track = this._tracks.find(item => item.name === channelName)
 
     var times = track.times
     var index = Timeliner.binarySearch(times, time)

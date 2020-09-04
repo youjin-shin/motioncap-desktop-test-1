@@ -31,8 +31,6 @@ The Docking Widget
 3. user can either move pointer away or let go of the cursor,
    allow the pane to be resized and snapped into position
 
-My origin implementation from https://codepen.io/zz85/pen/gbOoVP
-
 args eg.
 	var pane = document.getElementById('pane');
 	var ghostpane = document.getElementById('ghostpane');
@@ -134,7 +132,7 @@ function DockingWindow (panel, ghostpane) {
   }
 
   function onMouseDown (e) {
-    onDown(e)
+    // onDown(e)
   }
 
   function onMouseUp (e) {

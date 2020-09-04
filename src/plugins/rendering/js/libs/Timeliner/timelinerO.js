@@ -93,11 +93,11 @@ function Timeliner (controller) {
     if (utils.binarySearch(keyTimes, time) < 0) {
       controller.setKeyframe(channelName, time)
 
-      //			undo_manager.save(new UndoState(data, 'Add Keyframe'));
+      // undo_manager.save(new UndoState(context, 'Add Keyframe'))
     } else {
       controller.delKeyframe(channelName, time)
 
-      //			undo_manager.save(new UndoState(data, 'Remove Keyframe'));
+      // undo_manager.save(new UndoState(context, 'Remove Keyframe'))
     }
 
     repaintAll() // TODO repaint one channel would be enough
@@ -443,7 +443,7 @@ function Timeliner (controller) {
     width: '100%',
     height: '22px',
     lineHeight: '22px',
-    bottom: '0',
+    bottom: '44px',
     // padding: '2px',
     fontSize: '11px'
   }
@@ -752,8 +752,7 @@ function Timeliner (controller) {
       element.style.left = x + 'px'
       element.style.top = y + 'px'
       element.style.width = 100 + '%'
-      element.style.height = 100 + '%'
-
+      element.style.height = 'calc(100% )'
       if (element === pane) {
         resize(w, h)
       }

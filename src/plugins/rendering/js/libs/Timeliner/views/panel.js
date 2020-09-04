@@ -80,7 +80,7 @@ function TimelinePanel (controller, data, dispatcher) {
     track_canvas.height = (LayoutConstants.height) * dpr
     // track_canvas.style.width = LayoutConstants.width + 'px'
     track_canvas.style.width = controller.getContainerWidth() - LayoutConstants.LEFT_PANE_WIDTH + 'px'
-    track_canvas.style.height = LayoutConstants.height - TIME_SCROLLER_HEIGHT + 'px'
+    track_canvas.style.height = LayoutConstants.height + 'px'
     SCROLL_HEIGHT = LayoutConstants.height - TIME_SCROLLER_HEIGHT
     scroll_canvas.setSize(controller.getContainerWidth(), TIME_SCROLLER_HEIGHT)
   }
@@ -530,7 +530,7 @@ function TimelinePanel (controller, data, dispatcher) {
     var track = y_to_track(my)
     var s = x_to_time(mx)
 
-    console.log(layers[track].name)
+    console.log(layers[track])
 
     dispatcher.fire('keyframe', layers[track], currentTime)
   })

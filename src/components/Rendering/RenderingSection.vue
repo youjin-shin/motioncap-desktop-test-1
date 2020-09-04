@@ -47,8 +47,8 @@ export default {
 
       isGUIOn: false,
       // path: '/models/gltf/exo2.glb',
-      path: '/models/gltf/Soldier.glb',
-
+      path: '/models/gltf/Xbot.glb',
+      // path: '/models/gltf/Soldier.glb',
       // path: '/models/fbx/xbot.fbx',
       actions: [],
       bonePivotSize: 1.2,
@@ -72,7 +72,7 @@ export default {
       // console.log(this.sectionContainer.cle)
 
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / (window.innerHeight), 1, 1000)
-      camera.position.set(3, 3, -5)
+      camera.position.set(-2, 2, 5)
 
       camera.lookAt(0, 1, 0)
 
@@ -100,7 +100,7 @@ export default {
       // scene.add(dirLight)
 
       var spotLight = this.createSpotlight(0xFFFFFF)
-      spotLight.position.set(-5, 10, -5)
+      spotLight.position.set(5, 10, 5)
       var spotLightHelper = new THREE.SpotLightHelper(spotLight)
 
       scene.add(hemiLight, spotLightHelper, spotLight)
