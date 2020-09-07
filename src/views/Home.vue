@@ -6,7 +6,7 @@
   align-start
 >
   <v-container
-    class="main-container px-7 py-0"
+    class="main-container px-5 py-0"
     fluid
 
   >
@@ -31,7 +31,7 @@
   </v-container>
 
   <v-container
-    class="main-container px-7 py-0"
+    class="main-container px-5 py-0"
     fluid
   >
     <v-row style="height: 31vh" >

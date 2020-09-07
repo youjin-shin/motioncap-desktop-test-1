@@ -41,8 +41,31 @@ function LayerProp (name) {
 
 function Timeliner (controller) {
   // Dispatcher for coordination
+
   var dispatcher = new Dispatcher()
-  controller.init()
+  controller.timeliner = this
+  controller.init(this)
+
+  var context = {
+
+    width: controller.getContainerWidth(),
+    height: Settings.height,
+    // height: controller.getContainerHeight(),
+
+    scrollHeight: 0,
+
+    totalTime: 20.0,
+    timeScale: 60,
+
+    currentTime: 0.0,
+    scrollTime: 0.0,
+
+    dispatcher: dispatcher,
+
+    controller: controller
+
+  }
+
   // Data
   var data = controller._data
   var layer_store = controller._layer_store
@@ -79,10 +102,10 @@ function Timeliner (controller) {
         value: value,
         _color: '#' + (Math.random() * 0xffffff | 0).toString(16)
       })
+      // layer._color.splice(v, 0, '#' + (Math.random() * 0xffffff | 0).toString(16))
       // controller.setKeyframe(layer.name, t)
       // layer.values.splice(v, 0, value)
       // layer.times.splice(v, 0, t)
-
       undo_manager.save(new UndoState(data, 'Add Keyframe'))
     } else {
       console.log('remove from index', v)
@@ -742,7 +765,7 @@ function Timeliner (controller) {
     // console.log(newWidth)
     style(scrollbar.dom, {
       top: Settings.MARKER_TRACK_HEIGHT + 'px',
-      left: (newWidth - 16 - 50) + 'px'
+      left: (newWidth - 50) + 'px'
     })
 
     needsResize = true

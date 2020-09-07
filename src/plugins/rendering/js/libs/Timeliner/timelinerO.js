@@ -93,11 +93,11 @@ function Timeliner (controller) {
     if (utils.binarySearch(keyTimes, time) < 0) {
       controller.setKeyframe(channelName, time)
 
-      // undo_manager.save(new UndoState(context, 'Add Keyframe'))
+      undo_manager.save(new UndoState(context, 'Add Keyframe'))
     } else {
       controller.delKeyframe(channelName, time)
 
-      // undo_manager.save(new UndoState(context, 'Remove Keyframe'))
+      undo_manager.save(new UndoState(context, 'Remove Keyframe'))
     }
 
     repaintAll() // TODO repaint one channel would be enough
@@ -507,21 +507,21 @@ function Timeliner (controller) {
   // settings
   var cog = new IconButton(12, 'cog', 'settings', dispatcher)
 
-  bottom_right.appendChild(zoom_in.dom)
-  bottom_right.appendChild(zoom_out.dom)
-  bottom_right.appendChild(cog.dom)
+  // bottom_right.appendChild(zoom_in.dom)
+  // bottom_right.appendChild(zoom_out.dom)
+  // bottom_right.appendChild(cog.dom)
 
   // // add layer
-  // var plus = new IconButton(12, 'plus', 'New Layer', dispatcher)
-  // plus.onClick(function () {
-  //   // var name = prompt('Layer name?')
-  //   var name = 'test'
-  //   addLayer(name)
+  var plus = new IconButton(12, 'plus', 'New Layer', dispatcher)
+  plus.onClick(function () {
+    // var name = prompt('Layer name?')
+    var name = 'test'
+    addLayer(name)
 
-  //   // undo_manager.save(new UndoState(data, 'Layer added'));
+    // undo_manager.save(new UndoState(data, 'Layer added'));
 
-  //   repaintAll()
-  // })
+    repaintAll()
+  })
   // style(plus.dom, button_styles)
   // bottom_right.appendChild(plus.dom)
 
@@ -663,16 +663,16 @@ function Timeliner (controller) {
   }
 
   // // Need to fix
-  // function addLayer (name) {
-  //   var layer = new LayerProp(name)
+  function addLayer (name) {
+    var layer = new LayerProp(name)
 
-  //   layers = layer_store.value
-  //   layers.push(layer)
+    // layers = layer_store.value
+    // layers.push(layer)
 
-  //   layer_panel.updateState()
-  // }
+    layer_panel.updateState()
+  }
 
-  // this.addLayer = addLayer
+  this.addLayer = addLayer
 
   this.dispose = function dispose () {
     var domParent = pane.parentElement

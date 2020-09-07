@@ -1,6 +1,6 @@
 
 <template>
-    <div ref="container" id="rendering-container"/>
+    <div ref="container" id="rendering-container" style="height: 100%;"/>
 </template>
 <style>
 </style>
@@ -81,7 +81,7 @@ export default {
 
       scene = new THREE.Scene()
       scene.background = new THREE.Color(Theme.renderingFog)
-      scene.fog = new THREE.Fog(Theme.renderingFog, 10, 50)
+      scene.fog = new THREE.Fog(Theme.renderingFog, 10, 80)
 
       // grid = new THREE.GridHelper(16, 16, 0xff0000, 0x222222)
       // scene.add(grid)
@@ -107,7 +107,12 @@ export default {
 
       // scene.add(new CameraHelper(light.shadow.camera))
 
-      renderer = new THREE.WebGLRenderer({ antialias: true })
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+
+      // For accurate color
+      renderer.gammaFactor = 2.2
+      renderer.gammaOutput = true
+
       renderer.setPixelRatio(window.devicePixelRatio)
       renderer.setSize(window.innerWidth, window.innerHeight)
       renderer.shadowMap.enabled = true
@@ -120,7 +125,7 @@ export default {
       var texture = new THREE.TextureLoader().load('textures/texture_05.png', this.render)
       texture.wrapS = THREE.RepeatWrapping
       texture.wrapT = THREE.RepeatWrapping
-      texture.repeat.set(50, 50)
+      texture.repeat.set(30, 30)
       var mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(100, 100),
         new THREE.MeshPhongMaterial({
           color: Theme.renderingBackground,

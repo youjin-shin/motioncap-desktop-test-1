@@ -30,7 +30,8 @@ export default {
           type: THREE.VectorKeyframeTrack,
           propertyPath: objects[i].name + '.position',
           initialValue: vectorValue,
-          interpolation: THREE.InterpolateSmooth
+          interpolation: THREE.InterpolateSmooth,
+          color: '#' + (Math.random() * 0xffffff | 0).toString(16)
         })
 
         this.trackInfo.push(
@@ -38,10 +39,13 @@ export default {
             type: THREE.QuaternionKeyframeTrack,
             propertyPath: objects[i].name + '.quaternion',
             initialValue: quaternionValue,
-            interpolation: THREE.InterpolateLinear
+            interpolation: THREE.InterpolateLinear,
+            color: '#' + (Math.random() * 0xffffff | 0).toString(16)
 
           })
       }
+
+      console.log(this.trackInfo)
       var controller = new TimelinerController(scene, this.trackInfo, render, this.container)
       var timeliner = new Timeliner(controller)
       // console.log(this.trackInfo)

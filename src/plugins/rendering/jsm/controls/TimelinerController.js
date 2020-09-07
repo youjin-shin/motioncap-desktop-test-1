@@ -56,7 +56,6 @@ class TimelinerController {
       var spec = trackInfo[i]
       tracks.push(this._addTrack(spec.type, spec.propertyPath, spec.initialValue, spec.interpolation))
     }
-
     this._tracks = tracks
 
     this._data = new DataStore()
@@ -121,6 +120,7 @@ class TimelinerController {
     // var track = this.layer_store.value.find(item => item.name === channelName)
     var track = this._tracks.find(item => item.name === channelName)
 
+    console.log(track)
     var times = track.times
     var index = Timeliner.binarySearch(times, time)
     var values = track.values
@@ -300,9 +300,13 @@ class TimelinerController {
     var track = new type(prop, [0], initialValue, interpolation)
 
     // data must be in JS arrays so it can be resized
-    track.times = Array.prototype.slice.call(track.times)
-    track.values = Array.prototype.slice.call(track.values)
-
+    // track.times = Array.prototype.slice.call(track.times)
+    // track.values = Array.prototype.slice.call(track.values)
+    track.values = Array.prototype.slice.call({
+      time: track.times,
+      value: track.values,
+      _color: '#' + (Math.random() * 0xffffff | 0).toString(16)
+    })
     this._channelNames.push(prop)
     this._tracks[prop] = track
 

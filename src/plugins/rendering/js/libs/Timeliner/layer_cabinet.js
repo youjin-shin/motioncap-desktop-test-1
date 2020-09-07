@@ -362,7 +362,7 @@ function LayerCabinet (context) {
   }
 
   this.updateState = function () {
-    var layers = context.controller.getChannelNames()
+    var layers = controller.getChannelNames()
 
     // console.log(layer_uis.length, layers);
     var i, layer
